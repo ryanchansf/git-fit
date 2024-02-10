@@ -271,3 +271,7 @@ Deletes the desired workout. Should have to authenticate with password, if we en
   "success": "boolean"
 }
 ```
+
+### Workouts Example Flow
+
+Caroline wants to build her small calves so she calls create workout and passes in "Kalf Killer" and gets back a workout id of 1. She is overwhelmed by the thought of customizing her own workout but luckily she has Git Fit which makes it easy to start her calf building journey. She starts by calling the search exercises endpoint and searches by the calf muscle group and looks at the exercise list available. She finds an exercise she likes that has an exercise id of 2 and proceeds to add the exercise by calling the add exercise endpoint and inputting the exercise id. Feeling inspired, she decides she wants to create an exercise of her own so she calls the create exercise endpoint inputting the name of the exercise, the muscle group, and equipment needed. She gets back an exercise id and then adds this exercise to her workout. She continues these steps and adds over 10 new calf exercises to her workout. Then, she decides that she actually really enjoys her small calves and deletes her workout by calling the delete workout endpoint. 
