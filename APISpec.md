@@ -86,3 +86,76 @@ Deletes a user and their account based on their ID. Should have to authenticate 
   "success": "boolean"
 }
 ```
+
+## 2. Follow
+
+### 2.1. Follow User - `/follow/{userID}/` (POST)
+
+Adds a user to the user's "following" list. The URL userID is the current user, and the JSON request userID is the desired user to follow.
+
+**Request:**
+
+```json
+{
+  "username": "string"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "success": "boolean"
+}
+```
+
+### 2.2. See Followers/Following - `/follow/{userID}/` (GET)
+
+Shows a list of the people the user is following and people following the user. Both fields are optional-set one, none, or both to true. Will display as two separate lists if both are checked. May end up having to be two separate endpoints, depending on how the frontend is implemented.
+
+**Request:**
+
+```json
+{
+  "showFollowing": "boolean",
+  "showFollowers": "boolean
+}
+```
+
+**Returns:**
+
+```json
+{
+  "following": "array"
+  {
+    "username": "string"
+  },
+  "followers": "array"
+  {
+    "username": "string"
+  }
+}
+```
+
+### 2.3. Search Users - `/follow/` (GET)
+
+Search existing users on Git Fit by whole or partial username. Returns a list of matching users-note that the complete username is necessary to follow someone.
+
+**Request:**
+
+```json
+{
+  "username": "string"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "users": "array"
+  {
+    "username": "string"
+  }
+}
+```
