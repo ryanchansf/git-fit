@@ -87,6 +87,26 @@ Deletes a user and their account based on their ID. Should have to authenticate 
 }
 ```
 
+### 1.4. Create Workout - `/users/{userID}/` (POST)
+
+Creates a blank workout with nothing in it. Returns the ID of the newly created blank workout. From here, the user will use the workout ID to add exercises to it.
+
+**Request:**
+
+```json
+{
+  "workoutName": "string"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "workoutID": "string"
+}
+```
+
 ## 2. Follow
 
 ### 2.1. Follow User - `/follow/{userID}/` (POST)
@@ -118,7 +138,7 @@ Shows a list of the people the user is following and people following the user. 
 ```json
 {
   "showFollowing": "boolean",
-  "showFollowers": "boolean
+  "showFollowers": "boolean"
 }
 ```
 
@@ -157,5 +177,97 @@ Search existing users on Git Fit by whole or partial username. Returns a list of
   {
     "username": "string"
   }
+}
+```
+
+## 3. Workouts
+
+### 3.1. Search Exercises - `/workouts/` (GET)
+
+Searches for existing exercises. Can search by exercise name, muscle group, or equipment. Returns the full name of the exercise, including its ID, which the user needs to add it to their workout. Search fields are all optional.
+
+**Request:**
+
+```json
+{
+  "exerciseName": "string",
+  "muscleGroup": "string",
+  "equipment": "string"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "exercises": "array"
+  {
+    "exerciseName": "string",
+    "muscleGroup": "string",
+    "equipment": "string",
+    "exerciseID": "int"
+  }
+}
+```
+
+### 3.2. Create Exercise - `/workouts/` (POST)
+
+Allows the user to create a new exercise. Created exercises are universal to Git Fit-User A can use an exercise created by User B. Returns an exercise ID, which the user uses to add the exercise to a workout.
+
+**Request:**
+
+```json
+{
+  "exerciseName": "string",
+  "muscleGroup": "string",
+  "equipment": "string"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "exerciseID": "int"
+}
+```
+
+### 3.3. Add Exercise to Workout - `/workouts/{workoutID}/` (POST)
+
+Adds an exercise to a workout based on the exercise's ID.
+
+**Request:**
+
+```json
+{
+  "exerciseID": "int"
+}
+```
+
+**Returns:**
+
+```json
+{
+  "success": "boolean"
+}
+```
+
+### 3.4. Delete Workout - `/workouts/{workoutID}/delete` (DELETE)
+
+Deletes the desired workout. Should have to authenticate with password, if we end up doing that.
+
+**Request:**
+
+```json
+{
+
+}
+```
+
+**Returns:**
+
+```json
+{
+  "success": "boolean"
 }
 ```
