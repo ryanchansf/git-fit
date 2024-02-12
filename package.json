@@ -12,6 +12,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.3",
     "mongoose": "^7.6.3",
     "next": "14.0.0",
     "react": "^18",
