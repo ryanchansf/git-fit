@@ -70,7 +70,7 @@ export default function Home() {
         {cardData.map((card, index) => (
           <Card key={index}>
             <CardHeader>
-              <CardTitle>{card.title}</CardTitle>
+              <CardTitle> &lt; {card.title} /&gt;</CardTitle>
               <CardDescription>{card.description}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
