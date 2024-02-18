@@ -28,12 +28,15 @@ export default function RootLayout({
           "min-h-screen bg-background font-sans antialiased",
           fontSans.variable,
         )}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
       >
-        <div>
-          {children}
+        <div className="m-10">{children}</div>
 
-          <Navbar />
-        </div>
+        <Navbar />
       </body>
     </html>
   );
