@@ -77,7 +77,23 @@ export default function Home() {
         {cardData.map((card, index) => (
           <Card key={index}>
             <CardHeader>
-              <CardTitle> &lt; {card.title} /&gt;</CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle> &lt; {card.title} /&gt;</CardTitle>
+                <div className="flex gap-2">
+                  <Button className="bg-secondary" size="icon">
+                    <i
+                      className="fa-solid fa-pen-to-square"
+                      style={{ color: "hsl(var(--primary))" }}
+                    />
+                  </Button>
+                  <Button className="bg-secondary" size="icon">
+                    <i
+                      className="fa-solid fa-trash"
+                      style={{ color: "hsl(var(--primary))" }}
+                    />
+                  </Button>
+                </div>
+              </div>
               <CardDescription>{card.description}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
