@@ -2,9 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url("@fortawesome/fontawesome-free/css/all.css");
+
 @layer base {
   :root {
-    --background: 240 8% 23%;
+    --background: 240 5% 12%;
     --foreground: 224 71.4% 4.1%;
 
     --card: 241 11% 8%;

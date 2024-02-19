@@ -7,6 +7,8 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 const cardData = [
   {
@@ -64,7 +66,12 @@ export default function Home() {
     <div className="flex flex-col gap-5">
       <div className="flex justify-between px-100">
         <h1 className="text-4xl font-bold">Welcome back, username</h1>
-        <Button>+</Button>
+        <Button className="bg-secondary" size="lg">
+          <i
+            className="fa-solid fa-plus"
+            style={{ color: "hsl(var(--primary))" }}
+          />
+        </Button>
       </div>
       <div className="grid grid-cols-3 gap-4 px-20">
         {cardData.map((card, index) => (
