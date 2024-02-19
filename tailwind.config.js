@@ -19,7 +19,6 @@ module.exports = {
       },
     },
     extend: {
-      textColor: { default: "blue" },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
       },
