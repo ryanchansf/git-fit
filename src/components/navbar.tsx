@@ -30,6 +30,15 @@ export default function Navbar() {
         </Button>
         <h1>Profile</h1>
       </div>
+      <div className="flex flex-col items-center">
+        <Button variant="link">
+          <i
+            className="fa-solid fa-cog fa-2x"
+            style={{ color: "hsl(var(--accent))" }}
+          />
+        </Button>
+        <h1>Settings</h1>
+      </div>
     </div>
   );
 }
