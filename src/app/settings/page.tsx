@@ -14,45 +14,49 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
+import connectDB from "@/database/db";
 
+// All fields are optional
+// Can be empty, but if not empty, 2 <= chars <= 30
 const formSchema = z.object({
   first: z
     .string()
-    .min(2, {
-      message: "First name must be at least 2 characters.",
-    })
-    .max(30, { message: "First name must be less than 30 characters." }),
+    .min(2, { message: "First name must be at least 2 characters." })
+    .max(30, { message: "First name must be less than 30 characters." })
+    .or(z.literal("")),
   last: z
     .string()
-    .min(2, {
-      message: "Last name must be at least 2 characters.",
-    })
-    .max(30, { message: "Last name must be less than 30 characters." }),
+    .min(2, { message: "Last name must be at least 2 characters." })
+    .max(30, { message: "Last name must be less than 30 characters." })
+    .or(z.literal("")),
   username: z
     .string()
-    .min(2, {
-      message: "Username must be at least 2 characters.",
-    })
-    .max(30, { message: "Username must be less than 30 characters." }),
+    .min(2, { message: "Username must be at least 2 characters." })
+    .max(30, { message: "Username must be less than 30 characters." })
+    .or(z.literal("")),
   email: z
-    .string({
-      required_error: "Please input an email.",
-    })
-    .max(40, { message: "Email must be less than 40 characters." })
-    .email(),
+    .string({ required_error: "Please input an email." })
+    .max(30, { message: "Email must be less than 30 characters." })
+    .email()
+    .or(z.literal("")),
 });
 
 export default function Page() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      first: "",
+      last: "",
       username: "",
+      email: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
   }
+  //Object { first: "dddd", last: "aaaaa", username: "aaaaaa", email: "djdjd@gmail.comn" }
+  //Object { first: "", last: "", username: "", email: "" }
 
   return (
     <div className="flex flex-col gap-5">
