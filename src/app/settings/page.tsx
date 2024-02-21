@@ -132,7 +132,12 @@ export default function Page() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Submit changes</Button>
+            <Button type="submit">
+              <i style={{ color: "hsl(var(--primary))" }} />
+              <span style={{ color: "hsl(var(--accent))" }}>
+                Submit Changes
+              </span>
+            </Button>
           </form>
         </Form>
       </div>
