@@ -1,15 +1,18 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Navbar() {
   return (
     <div className="flex px-20 py-5 bg-primary justify-center gap-20">
       <div className="flex flex-col items-center">
-        <Button variant="link">
-          <i
-            className="fa-solid fa-house fa-2x"
-            style={{ color: "hsl(var(--accent))" }}
-          />
-        </Button>
+        <Link href="/">
+          <Button variant="link">
+            <i
+              className="fa-solid fa-house fa-2x"
+              style={{ color: "hsl(var(--accent))" }}
+            />
+          </Button>
+        </Link>
         <h1>Home</h1>
       </div>
       <div className="flex flex-col items-center">
@@ -31,12 +34,14 @@ export default function Navbar() {
         <h1>Profile</h1>
       </div>
       <div className="flex flex-col items-center">
-        <Button variant="link">
-          <i
-            className="fa-solid fa-cog fa-2x"
-            style={{ color: "hsl(var(--accent))" }}
-          />
-        </Button>
+        <Link href="/settings">
+          <Button variant="link">
+            <i
+              className="fa-solid fa-cog fa-2x"
+              style={{ color: "hsl(var(--accent))" }}
+            />
+          </Button>
+        </Link>
         <h1>Settings</h1>
       </div>
     </div>
