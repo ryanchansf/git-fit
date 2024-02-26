@@ -64,49 +64,6 @@ export async function POST(req: Request) {
   }
 }
 
-// export async function POST_w_id(req: Request, params: Parameters) {
-//   try {
-//     const db = connectDB();
-
-//     if (!db) {
-//       throw new Error("Failed to connect to the database");
-//     }
-
-//     const {w_id, exercise_id} = await req.json();
-
-//     // Select exercise based on exercise_id in Supabase database
-//     const { data: exercise_info, error: exercise_error } = await db
-//       .from("exercises")
-//       .select("*")
-//       .match({ exercise_id: exercise_id})
-
-//       if (exercise_error) {
-//         throw exercise_error;
-//       }
-
-//     // Add exercise to workout based on workout_id
-//     const { data: workout_info, error: workout_error } = await db
-//       .from("workouts")
-//       .insert([{ w_id, exercise_id }] as any);
-
-//     if (workout_error) {
-//       throw workout_error;
-//     }
-
-//     // Return success message in response
-//     return NextResponse.json({
-//       message: "Exerice added",
-//       status: 200,
-//     });
-//   } catch (error) {
-//     console.error(error); // Log the error to the console
-//     return NextResponse.json({
-//       message: `Failed to add exercise. Please try again later`,
-//       status: 500,
-//     });
-//   }
-// }
-
 export async function DELETE(req: Request) {
   try {
     const db = connectDB();
