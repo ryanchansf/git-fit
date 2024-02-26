@@ -7,8 +7,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import React from "react";
 
 const cardData = [
   {
@@ -66,7 +65,7 @@ export default function Home() {
     <div className="flex flex-col gap-5">
       <div className="flex justify-between px-100">
         <h1 className="text-4xl font-bold">Welcome back, username</h1>
-        <Button className="bg-secondary" size="lg">
+        <Button className="bg-accent" size="lg">
           <i
             className="fa-solid fa-plus"
             style={{ color: "hsl(var(--primary))" }}
@@ -78,15 +77,15 @@ export default function Home() {
           <Card key={index}>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle> &lt; {card.title} /&gt;</CardTitle>
+                <CardTitle>{card.title}</CardTitle>
                 <div className="flex gap-2">
-                  <Button className="bg-secondary" size="icon">
+                  <Button className="bg-accent" size="icon">
                     <i
                       className="fa-solid fa-pen-to-square"
                       style={{ color: "hsl(var(--primary))" }}
                     />
                   </Button>
-                  <Button className="bg-secondary" size="icon">
+                  <Button className="bg-accent" size="icon">
                     <i
                       className="fa-solid fa-trash"
                       style={{ color: "hsl(var(--primary))" }}

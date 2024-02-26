@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import React from "react";
 
 export default function Navbar() {
   return (
@@ -25,24 +26,15 @@ export default function Navbar() {
         <h1>Friends</h1>
       </div>
       <div className="flex flex-col items-center">
-        <Button variant="link">
-          <i
-            className="fa-solid fa-user fa-2x"
-            style={{ color: "hsl(var(--accent))" }}
-          />
-        </Button>
-        <h1>Profile</h1>
-      </div>
-      <div className="flex flex-col items-center">
-        <Link href="/settings">
+        <Link href="/profile">
           <Button variant="link">
             <i
-              className="fa-solid fa-cog fa-2x"
+              className="fa-solid fa-user fa-2x"
               style={{ color: "hsl(var(--accent))" }}
             />
           </Button>
         </Link>
-        <h1>Settings</h1>
+        <h1>Profile</h1>
       </div>
     </div>
   );
