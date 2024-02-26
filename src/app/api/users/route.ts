@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/database/db";
 
 export async function POST(req: Request) {
@@ -31,17 +31,34 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const supabase = connectDB();
+    const url = new URL(req.url ? req.url : "invalid");
+    const username = url.searchParams.get("username");
 
-    // Get all users from the database
-    const { data, error } = await supabase.from("users").select("*");
+    let data, error;
+
+    // If a username is provided, get that specific user
+    if (username) {
+      ({ data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("username", username));
+
+      // If no user was found, throw an error
+      if (data.length === 0) {
+        throw new Error(`User with username ${username} not found`);
+      }
+    } else {
+      // If no username is provided, get all users
+      ({ data, error } = await supabase.from("users").select("*"));
+    }
 
     if (error) {
       throw error;
     }
-
+    console.log("returning data: ", data);
     // Return the users in the response
     return NextResponse.json({
       message: "Users retrieved",
