@@ -39,10 +39,45 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import connectDB from "@/database/db";
+import { NextResponse } from "next/server";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 //TODO: import card data from database
+function getWorkouts() {
+  try {
+    const db = connectDB();
+
+    if (!db) {
+      throw new Error("Failed to connect to the database");
+    }
+
+    const workouts = db.from("workout_info").select("*");
+    //.match({ ex_id: exercise_id });
+
+    // Return the workouts in the response
+    // return NextResponse.json({
+    //   message: "Exercises displayed",
+    //   status: 200,
+    //   workouts,
+    // });
+    return workouts;
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({
+      message: `Failed to display workouts: ${error}`,
+      status: 500,
+    });
+  }
+}
+
+// const cardData1 = [
+//   {
+
+//   }
+// ]
+
 const cardData = [
   {
     title: "Push 1",
@@ -103,6 +138,7 @@ const formSchema = z.object({
     .string()
     .min(1, { message: "Duration must be an integer greater than 0" })
     .max(3, { message: "Duration must be an integer less than 1000" })
+    // Regex to detect if the input is an integer
     .refine((str) => /^\d+$/.test(str), {
       message: "Duration must be an integer",
     }),
@@ -120,6 +156,7 @@ export default function Home() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+    console.log(getWorkouts());
   }
   return (
     <div className="flex flex-col gap-5">
