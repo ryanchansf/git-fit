@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,9 +8,41 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
+//TODO: import card data from database
 const cardData = [
   {
     title: "Push 1",
@@ -61,17 +94,125 @@ const cardData = [
   },
 ];
 
+const formSchema = z.object({
+  name: z
+    .string()
+    .min(2, { message: "Workout name must be at least 2 characters." })
+    .max(20, { message: "Workout name must be less than 20 characters." }),
+  duration: z
+    .string()
+    .min(1, { message: "Duration must be an integer greater than 0" })
+    .max(3, { message: "Duration must be an integer less than 1000" })
+    .refine((str) => /^\d+$/.test(str), {
+      message: "Duration must be an integer",
+    }),
+  difficulty: z.enum(["Easy", "Medium", "Hard"]),
+});
+
 export default function Home() {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      difficulty: "Medium",
+    },
+    mode: "onChange",
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
+  }
   return (
     <div className="flex flex-col gap-5">
       <div className="flex justify-between px-100">
         <h1 className="text-4xl font-bold">Welcome back, username</h1>
-        <Button className="bg-secondary" size="lg">
-          <i
-            className="fa-solid fa-plus"
-            style={{ color: "hsl(var(--primary))" }}
-          />
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-secondary" size="lg">
+              <i
+                className="fa-solid fa-plus"
+                style={{ color: "hsl(var(--primary))" }}
+              />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add workout</DialogTitle>
+              <DialogDescription>
+                Add new workouts here. Click &quot;add workout&quot; when
+                you&apos;re done.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8"
+              >
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Workout name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Kalf Killer" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="duration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Duration (min)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Integer 1 - 999" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="difficulty"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Difficulty</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Easy">Easy</SelectItem>
+                          <SelectItem value="Medium">Medium</SelectItem>
+                          <SelectItem value="Hard">Hard</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="submit" className="bg-secondary">
+                      Add workout
+                      <i
+                        className="fa-solid"
+                        style={{ color: "hsl(var(--primary))" }}
+                      />
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
       <div className="grid grid-cols-3 gap-4 px-20">
         {cardData.map((card, index) => (
