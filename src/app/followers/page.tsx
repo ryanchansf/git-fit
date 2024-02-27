@@ -46,7 +46,12 @@ export default function Followers() {
               </Avatar>
             </div>
             <div style={{ marginLeft: "25px" }}>
-              <Button variant="outline">{follower.user_name}</Button>
+              <Button type="submit">
+                <i style={{ color: "hsl(var(--primary)" }} />
+                <span style={{ color: "hsl(var(--accent))" }}>
+                  {follower.user_name}
+                </span>
+              </Button>
             </div>
           </div>
         ))}
