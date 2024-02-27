@@ -21,7 +21,5 @@ export default function Login() {
     redirect("/");
   }
 
-  //   if (status === "loading") return null; // Loading state
-
   return <AuthCard />;
 }

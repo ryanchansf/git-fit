@@ -8,7 +8,6 @@ export default function Navbar() {
   const handleLogout = async () => {
     console.log("Logging out");
     await signOut();
-    redirect("/register");
   };
 
   return (

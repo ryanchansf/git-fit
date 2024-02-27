@@ -45,8 +45,6 @@ export function LoginCard() {
             return;
           }
           console.log("Successfully logging user in");
-          console.log("Response from signIn: ", res);
-          router.push("/");
         } catch (error) {
           console.log(error);
         }
