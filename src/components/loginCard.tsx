@@ -14,20 +14,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
 
 export function LoginCard() {
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  //   const [errorMessage, setErrorMessage] = useState("");
+  const { toast } = useToast();
 
   const handleLogin = async () => {
     try {
       const response = await fetch(`/api/users?username=${username}`);
       const jsonResponse = await response.json();
       const user = jsonResponse.data;
+      let errorMessage = "";
 
       if (user) {
         // user exists so try to sign in with password credentials
@@ -40,17 +41,20 @@ export function LoginCard() {
           });
 
           if (res && res.error) {
-            console.log("Invalid Credentials");
-            setErrorMessage("Invalid Credentials");
-            return;
+            errorMessage = "Invalid credentials";
           }
-          console.log("Successfully logging user in");
         } catch (error) {
           console.log(error);
         }
       } else {
-        setErrorMessage("Account Doesn't Exist");
-        return;
+        errorMessage = "Account doesn't exist";
+      }
+      if (errorMessage) {
+        toast({
+          title: errorMessage,
+          variant: "destructive",
+          duration: 3000,
+        });
       }
     } catch (error) {
       console.log(error);

@@ -1,5 +1,5 @@
 import GoogleProvider from "next-auth/providers/google";
-import { AuthOptions, RequestInternal } from "next-auth";
+import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import getBaseUrl from "@/database/path";
 
@@ -71,26 +71,6 @@ const options: AuthOptions = {
       },
     }),
   ],
-  // callbacks: {
-  //   async signIn(params: {
-  //     token: JWT;
-  //     user: User | AdapterUser;
-  //     account: Account | null;
-  //     profile?: Profile | undefined;
-  //     trigger?: "signIn" | "signUp" | "update" | undefined;
-  //     isNewUser?: boolean | undefined;
-  //     session?: any;
-  //   }) {
-  //     const { token, user } = params;
-  //     const session = { ...params.session, user: token }; // Include the token in the session
-  //     return session;
-  //   },
-  //   async session(params) {
-  //     const { session, token } = params;
-  //     session.user = token; // Include the token in the session
-  //     return session;
-  //   },
-  // },
   session: {
     strategy: "jwt",
   },

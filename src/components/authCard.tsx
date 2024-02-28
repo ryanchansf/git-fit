@@ -3,7 +3,7 @@
 import { CreateAccount } from "@/components/createAccountCard";
 import { LoginCard } from "@/components/loginCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export function AuthCard() {
   const [tab, setTab] = useState("login");
