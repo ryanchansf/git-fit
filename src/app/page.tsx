@@ -44,39 +44,11 @@ import { NextResponse } from "next/server";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
-//TODO: import card data from database
-function getWorkouts() {
-  try {
-    const db = connectDB();
-
-    if (!db) {
-      throw new Error("Failed to connect to the database");
-    }
-
-    const workouts = db.from("workout_info").select("*");
-    //.match({ ex_id: exercise_id });
-
-    // Return the workouts in the response
-    // return NextResponse.json({
-    //   message: "Exercises displayed",
-    //   status: 200,
-    //   workouts,
-    // });
-    return workouts;
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({
-      message: `Failed to display workouts: ${error}`,
-      status: 500,
-    });
-  }
-}
-
-// const cardData1 = [
-//   {
-
-//   }
-// ]
+// TODO:
+// - Validate usernames
+// - Disable "Add workout" button until form errors are corrected
+// - Clear form fields after submitting form
+// - Fetch cards from database
 
 const cardData = [
   {
@@ -143,6 +115,7 @@ const formSchema = z.object({
       message: "Duration must be an integer",
     }),
   difficulty: z.enum(["Easy", "Medium", "Hard"]),
+  tags: z.string().max(100, { message: "No more than 100 characters allowed" }),
 });
 
 export default function Home() {
@@ -154,10 +127,42 @@ export default function Home() {
     mode: "onChange",
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    console.log(getWorkouts());
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const message = {
+      username: "caroline_calves",
+      duration: values.duration,
+      difficulty: values.difficulty,
+      tags: values.tags.replaceAll(" ", "").split(","),
+      w_name: values.name,
+    };
+    const promise = fetch("/api/workouts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    });
+    return promise;
   }
+
+  // Doesn't work yet
+  async function getWorkouts() {
+    const newCard: Object[] = [];
+    await fetch("/api/workouts")
+      .then((response) => response.json())
+      .then((data) => {
+        const workouts = data.workouts;
+        for (const obj of workouts) {
+          newCard.push({
+            title: obj.w_name,
+            time: obj.duration,
+            difficulty: obj.difficulty,
+          });
+        }
+      });
+    return newCard;
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex justify-between px-100">
@@ -231,6 +236,23 @@ export default function Home() {
                           <SelectItem value="Hard">Hard</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Add tags</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Biceps" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Add any relevant tags, like &quot;arms&quot; or
+                        &quot;calves,&quot; separated by a comma.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
