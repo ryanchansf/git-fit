@@ -5,13 +5,13 @@ export async function POST(req: Request) {
   try {
     const supabase = connectDB();
 
-    const { username, phoneNumber, email } = await req.json();
-    console.log(username, phoneNumber, email);
+    const { username, email, password } = await req.json();
+    console.log(username, email, password);
 
     // Insert the new user into the Supabase database
     const { error } = await supabase
       .from("users")
-      .insert([{ username, phoneNumber, email }]);
+      .insert([{ username, email, password }]);
 
     if (error) {
       throw error;

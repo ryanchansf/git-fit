@@ -40,17 +40,23 @@ export function CreateAccount({ setTab }: CreateAccountCardProps) {
       } else {
         // user does not exist so create new user
         try {
-          await fetch("/api/users", {
+          const response = await fetch("/api/users", {
             method: "POST",
             body: JSON.stringify({ username, email, password }),
             headers: {
               "Content-Type": "application/json",
             },
           });
+          const data = await response.json();
+          if (!response.ok) {
+            console.log("Error creating user:", data.message);
+            setErrorMessage("Failed to create user");
+            return;
+          }
           console.log("User created successfully");
           setTab("login");
         } catch (error) {
-          console.log("Couldn't create user:", error);
+          console.log("Failed to create user:", error);
         }
       }
     } catch (error) {
