@@ -2,9 +2,10 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function Navbar() {
+  const { data: session } = useSession();
   const handleLogout = async () => {
     console.log("Logging out");
     await signOut();
@@ -52,15 +53,17 @@ export default function Navbar() {
         </Link>
         <h1>Settings</h1>
       </div>
-      <div className="flex flex-col items-center hover:-translate-y-[2px]">
-        <Button variant="link" onClick={() => handleLogout()}>
-          <i
-            className="fa-solid fa-arrow-right-from-bracket fa-2x"
-            style={{ color: "hsl(var(--accent))" }}
-          />
-        </Button>
-        <h1>Log out</h1>
-      </div>
+      {session?.user?.email && (
+        <div className="flex flex-col items-center hover:-translate-y-[2px]">
+          <Button variant="link" onClick={() => handleLogout()}>
+            <i
+              className="fa-solid fa-arrow-right-from-bracket fa-2x"
+              style={{ color: "hsl(var(--accent))" }}
+            />
+          </Button>
+          <h1>Log out</h1>
+        </div>
+      )}
     </div>
   );
 }
