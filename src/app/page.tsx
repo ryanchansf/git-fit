@@ -7,6 +7,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
+import React from "react";
 import WelcomeHeader from "@/components/welcomeHeader";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
@@ -67,7 +68,7 @@ export default async function Home() {
     <div className="flex flex-col gap-5">
       <div className="flex justify-between px-100">
         <WelcomeHeader />
-        <Button className="bg-secondary" size="lg">
+        <Button className="bg-accent" size="lg">
           <i
             className="fa-solid fa-plus"
             style={{ color: "hsl(var(--primary))" }}
@@ -79,15 +80,15 @@ export default async function Home() {
           <Card key={index}>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle> &lt; {card.title} /&gt;</CardTitle>
+                <CardTitle>{card.title}</CardTitle>
                 <div className="flex gap-2">
-                  <Button className="bg-secondary" size="icon">
+                  <Button className="bg-accent" size="icon">
                     <i
                       className="fa-solid fa-pen-to-square"
                       style={{ color: "hsl(var(--primary))" }}
                     />
                   </Button>
-                  <Button className="bg-secondary" size="icon">
+                  <Button className="bg-accent" size="icon">
                     <i
                       className="fa-solid fa-trash"
                       style={{ color: "hsl(var(--primary))" }}

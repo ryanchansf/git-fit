@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import React from "react";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 
@@ -34,24 +35,26 @@ export default function Navbar() {
         <h1>Friends</h1>
       </div>
       <div className="flex flex-col items-center hover:-translate-y-[2px]">
-        <Button variant="link">
-          <i
-            className="fa-solid fa-user fa-2x"
-            style={{ color: "hsl(var(--accent))" }}
-          />
-        </Button>
+        <Link href="/profile">
+          <Button variant="link">
+            <i
+              className="fa-solid fa-user fa-2x"
+              style={{ color: "hsl(var(--accent))" }}
+            />
+          </Button>
+        </Link>
         <h1>Profile</h1>
       </div>
       <div className="flex flex-col items-center hover:-translate-y-[2px]">
         <Link href="/settings">
           <Button variant="link">
             <i
-              className="fa-solid fa-cog fa-2x"
+              className="fa-solid fa-user fa-2x"
               style={{ color: "hsl(var(--accent))" }}
             />
           </Button>
         </Link>
-        <h1>Settings</h1>
+        <h1>Profile</h1>
       </div>
       {session?.user?.email && (
         <div className="flex flex-col items-center hover:-translate-y-[2px]">
