@@ -4,6 +4,8 @@ import { JetBrains_Mono as FontSans } from "next/font/google";
 
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/navbar";
+import AuthProvider from "@/Provider";
+import { Toaster } from "@/components/ui/toaster";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
@@ -34,9 +36,14 @@ export default function RootLayout({
           justifyContent: "space-between",
         }}
       >
-        <div className="m-10">{children}</div>
+        <AuthProvider>
+          <div className="m-10">{children}</div>
 
-        <Navbar />
+          <div className="fixed bottom-0 w-full">
+            <Navbar />
+          </div>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
