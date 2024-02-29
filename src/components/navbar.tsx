@@ -1,10 +1,13 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import React from "react";
 
 export default function Navbar() {
   return (
     <div className="flex px-20 py-5 bg-primary justify-center gap-20">
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center hover:-translate-y-[2px]">
         <Link href="/">
           <Button variant="link">
             <i
@@ -15,7 +18,7 @@ export default function Navbar() {
         </Link>
         <h1>Home</h1>
       </div>
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center hover:-translate-y-[2px]">
         <Button variant="link">
           <i
             className="fa-solid fa-user-group fa-2x"
@@ -24,25 +27,16 @@ export default function Navbar() {
         </Button>
         <h1>Friends</h1>
       </div>
-      <div className="flex flex-col items-center">
-        <Button variant="link">
-          <i
-            className="fa-solid fa-user fa-2x"
-            style={{ color: "hsl(var(--accent))" }}
-          />
-        </Button>
-        <h1>Profile</h1>
-      </div>
-      <div className="flex flex-col items-center">
-        <Link href="/settings">
+      <div className="flex flex-col items-center hover:-translate-y-[2px]">
+        <Link href="/profile">
           <Button variant="link">
             <i
-              className="fa-solid fa-cog fa-2x"
+              className="fa-solid fa-user fa-2x"
               style={{ color: "hsl(var(--accent))" }}
             />
           </Button>
         </Link>
-        <h1>Settings</h1>
+        <h1>Profile</h1>
       </div>
     </div>
   );

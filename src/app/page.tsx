@@ -43,6 +43,10 @@ import connectDB from "@/database/db";
 import { NextResponse } from "next/server";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import React from "react";
+import WelcomeHeader from "@/components/welcomeHeader";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 // TODO:
 // General:
@@ -170,7 +174,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex justify-between px-100">
-        <h1 className="text-4xl font-bold">Welcome back, username</h1>
+        <WelcomeHeader />
         <Dialog>
           <DialogTrigger asChild>
             <Button className="bg-secondary" size="lg">
@@ -282,15 +286,15 @@ export default function Home() {
           <Card key={index}>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle> &lt; {card.title} /&gt;</CardTitle>
+                <CardTitle>{card.title}</CardTitle>
                 <div className="flex gap-2">
-                  <Button className="bg-secondary" size="icon">
+                  <Button className="bg-accent" size="icon">
                     <i
                       className="fa-solid fa-pen-to-square"
                       style={{ color: "hsl(var(--primary))" }}
                     />
                   </Button>
-                  <Button className="bg-secondary" size="icon">
+                  <Button className="bg-accent" size="icon">
                     <i
                       className="fa-solid fa-trash"
                       style={{ color: "hsl(var(--primary))" }}
