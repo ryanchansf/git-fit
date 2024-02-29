@@ -1,4 +1,4 @@
-import connectDB from "@database/db";
+import connectDB from "@/database/db";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -54,12 +54,17 @@ export async function POST(req: Request) {
       throw exercise_error;
     }
 
+    if (exercise_info.length > 0) {
+      throw new Error("The exercise is already in the workout");
+    }
+
     // Add exercise to workout based on workout_id
     const { data: workout_info, error: workout_error } = await db
       .from("workouts")
       .insert([{ exercise_id, w_id, reps }] as any);
 
     if (workout_error) {
+      // console.log(workout_error)
       throw workout_error;
     }
 
