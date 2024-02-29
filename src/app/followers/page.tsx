@@ -30,6 +30,7 @@ export default function Followers() {
       >
         <h1 className="text-4xl font-bold">Followers</h1>
       </div>
+
       <div className="grid grid-cols-1 gap-4 px-20">
         {followerData.map((follower, index) => (
           <div
