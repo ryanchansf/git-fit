@@ -137,7 +137,7 @@ export function CreateAccount({ setTab }: CreateAccountCardProps) {
         <CardFooter>
           <Button
             variant="secondary"
-            className="w-full text-white"
+            className="w-full bg-accent text-white"
             onClick={handleCreateAccount}
           >
             Create account

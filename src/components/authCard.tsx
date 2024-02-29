@@ -16,7 +16,7 @@ export function AuthCard() {
             <TabsTrigger
               id="login"
               value="login"
-              className="text-secondary bg-white hover:bg-secondary hover:text-white rounded-full"
+              className="text-accent bg-white hover:bg-secondary hover:text-white rounded-full"
               onClick={() => setTab("login")}
             >
               Login
@@ -24,7 +24,7 @@ export function AuthCard() {
             <TabsTrigger
               id="register"
               value="register"
-              className="text-secondary bg-white hover:bg-secondary hover:text-white rounded-full"
+              className="text-accent bg-white hover:bg-secondary hover:text-white rounded-full"
               onClick={() => setTab("register")}
             >
               Register
