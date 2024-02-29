@@ -52,24 +52,25 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 //   - Disable "Add workout" button until form errors are corrected
 //   - Clear form fields after submitting form
 
-async function getWorkouts() {
-  const newCard: Object[] = [];
-  await fetch("/api/workouts")
-    .then((response) => response.json())
-    .then((data) => {
-      for (const obj of data.workouts) {
-        newCard.push({
-          title: obj.w_name,
-          time: obj.duration,
-          difficulty: obj.difficulty,
-        });
-      }
-    });
-  const dat = await fetch("/api/workouts");
-  return dat;
-}
-
-console.log(getWorkouts());
+// Not functional
+// async function getWorkouts() {
+//   const newCard: Object[] = [];
+//   await fetch("/api/workouts")
+//     .then((response) => response.json())
+//     .then((data) => {
+//       for (const obj of data.workouts) {
+//         newCard.push({
+//           title: obj.w_name,
+//           time: obj.duration,
+//           difficulty: obj.difficulty,
+//         });
+//       }
+//     });
+//   const resp = (await fetch("/api/workouts"));
+//   const data = resp.json();
+//   console.log(data);
+//   return data;
+// }
 
 const cardData = [
   {
@@ -165,26 +166,6 @@ export default function Home() {
     });
     return promise;
   }
-
-  // Doesn't work yet
-  // async function getWorkouts() {
-  //   const newCard: Object[] = [];
-  //   await fetch("/api/workouts")
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       for (const obj of data.workouts) {
-  //         newCard.push({
-  //           title: obj.w_name,
-  //           time: obj.duration,
-  //           difficulty: obj.difficulty,
-  //         });
-  //       }
-  //     });
-  //   const dat = await fetch("/api/workouts");
-  //   return dat;
-  // }
-
-  // console.log(getWorkouts());
 
   return (
     <div className="flex flex-col gap-5">
