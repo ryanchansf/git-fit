@@ -45,10 +45,31 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 // TODO:
-// - Validate usernames
-// - Disable "Add workout" button until form errors are corrected
-// - Clear form fields after submitting form
-// - Fetch cards from database
+// General:
+//   - Fetch cards from database
+// Add Workout popup:
+//   - Use usernames when adding new workouts (From Ryan's commit)
+//   - Disable "Add workout" button until form errors are corrected
+//   - Clear form fields after submitting form
+
+async function getWorkouts() {
+  const newCard: Object[] = [];
+  await fetch("/api/workouts")
+    .then((response) => response.json())
+    .then((data) => {
+      for (const obj of data.workouts) {
+        newCard.push({
+          title: obj.w_name,
+          time: obj.duration,
+          difficulty: obj.difficulty,
+        });
+      }
+    });
+  const dat = await fetch("/api/workouts");
+  return dat;
+}
+
+console.log(getWorkouts());
 
 const cardData = [
   {
@@ -135,7 +156,7 @@ export default function Home() {
       tags: values.tags.replaceAll(" ", "").split(","),
       w_name: values.name,
     };
-    const promise = fetch("/api/workouts", {
+    const promise = await fetch("/api/workouts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -146,22 +167,24 @@ export default function Home() {
   }
 
   // Doesn't work yet
-  async function getWorkouts() {
-    const newCard: Object[] = [];
-    await fetch("/api/workouts")
-      .then((response) => response.json())
-      .then((data) => {
-        const workouts = data.workouts;
-        for (const obj of workouts) {
-          newCard.push({
-            title: obj.w_name,
-            time: obj.duration,
-            difficulty: obj.difficulty,
-          });
-        }
-      });
-    return newCard;
-  }
+  // async function getWorkouts() {
+  //   const newCard: Object[] = [];
+  //   await fetch("/api/workouts")
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       for (const obj of data.workouts) {
+  //         newCard.push({
+  //           title: obj.w_name,
+  //           time: obj.duration,
+  //           difficulty: obj.difficulty,
+  //         });
+  //       }
+  //     });
+  //   const dat = await fetch("/api/workouts");
+  //   return dat;
+  // }
+
+  // console.log(getWorkouts());
 
   return (
     <div className="flex flex-col gap-5">
