@@ -8,6 +8,9 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import React from "react";
+import WelcomeHeader from "@/components/welcomeHeader";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 const cardData = [
   {
@@ -60,11 +63,11 @@ const cardData = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex justify-between px-100">
-        <h1 className="text-4xl font-bold">Welcome back, username</h1>
+        <WelcomeHeader />
         <Button className="bg-accent" size="lg">
           <i
             className="fa-solid fa-plus"

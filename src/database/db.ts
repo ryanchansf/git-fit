@@ -12,8 +12,8 @@ let connection: ReturnType<typeof createClient>;
 const connectDB = () => {
   if (!connection) {
     connection = createClient(supabaseUrl, supabaseKey);
-    return connection;
   }
+  return connection;
 };
 
 export default connectDB;
