@@ -54,6 +54,17 @@ export default function Page() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+    /*
+    if (values.first !== "") {
+      db.
+    }
+    if (values.username !== "") {
+
+    }
+    if (values.email !== "") {
+
+    }
+    */
   }
   //Object { first: "dddd", last: "aaaaa", username: "aaaaaa", email: "djdjd@gmail.comn" }
   //Object { first: "", last: "", username: "", email: "" }
@@ -66,80 +77,77 @@ export default function Page() {
           Change all, one, or none of the available fields.
         </h1>
         <hr></hr>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="first"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Update first name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    This is your first name as it appears publicly.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="last"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Update last name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Doe" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    This is your last name as it appears publicly.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Update username</FormLabel>
-                  <FormControl>
-                    <Input placeholder="user" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    This is your public display name.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Update email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="user@domain.com" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    This is the email address attached to your account.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">
-              <i style={{ color: "hsl(var(--primary))" }} />
-              <span style={{ color: "hsl(var(--accent))" }}>
-                Submit Changes
-              </span>
-            </Button>
-          </form>
-        </Form>
+        <div className="flex flex-basis">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="first"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Update first name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This is your first name as it appears publicly.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="last"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Update last name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Doe" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This is your last name as it appears publicly.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Update username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="user" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This is your public display name.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Update email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="user@domain.com" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This is the email address attached to your account.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">Submit changes</Button>
+            </form>
+          </Form>
+        </div>
       </div>
     </div>
   );
