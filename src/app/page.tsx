@@ -177,7 +177,7 @@ export default function Home() {
         <WelcomeHeader />
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="bg-secondary" size="lg">
+            <Button className="bg-accent" size="lg">
               <i
                 className="fa-solid fa-plus"
                 style={{ color: "hsl(var(--primary))" }}
