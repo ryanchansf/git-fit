@@ -1,29 +1,58 @@
 import connectDB from "@/database/db";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const db = connectDB();
+    const url = new URL(req.url ? req.url : "invalid");
+    const username = url.searchParams.get("username");
+    const duration = parseInt(url.searchParams.get("duration") || "");
+    const difficulty = url.searchParams.get("difficulty");
+    const tags = url.searchParams.get("tags");
+    const w_name = url.searchParams.get("w_name");
 
-    if (!db) {
-      throw new Error("Failed to connect to the database");
+    let data, error;
+
+    let query = db.from("workout_info").select("*");
+
+    if (username) {
+      query = query.ilike("username", username);
+    }
+    if (!isNaN(duration)) {
+      query = query.eq("duration", duration);
+    }
+    if (difficulty) {
+      query = query.ilike("difficulty", difficulty);
+    }
+    if (tags) {
+      query = query.eq("tags", tags);
+    }
+    if (w_name) {
+      query = query.ilike("w_name", w_name);
     }
 
-    const { data: workouts, error } = await db.from("workout_info").select("*");
+    ({ data, error } = await query);
 
     if (error) {
       throw error;
     }
-    // Return the workouts in the response
+
+    if (data.length === 0) {
+      return NextResponse.json({
+        message: "No workouts found matching the criteria",
+        status: 404,
+      });
+    }
+
     return NextResponse.json({
       message: "Workouts retrieved",
       status: 200,
-      workouts,
+      data,
     });
   } catch (error) {
     console.error(error);
     return NextResponse.json({
-      message: `${error}`,
+      message: `Failed to retrieve workouts. ${error}`,
       status: 500,
     });
   }
@@ -38,9 +67,14 @@ export async function POST(req: Request) {
     }
 
     const { username, duration, difficulty, tags, w_name } = await req.json();
+
+    // Check if any of the required parameters are missing
+    if (!username || !duration || !difficulty || !tags || !w_name) {
+      throw new Error("Missing required parameters");
+    }
+
     console.log(username, duration, difficulty, tags, w_name);
 
-    // Insert the new workout into the Supabase database
     const { data: workout_info, error } = await db
       .from("workout_info")
       .insert([{ username, duration, difficulty, tags, w_name }] as any);
@@ -49,16 +83,15 @@ export async function POST(req: Request) {
       throw error;
     }
 
-    // Return the workout_id in the response
     return NextResponse.json({
       message: "Workout Created",
       status: 201,
       workout_info,
     });
   } catch (error) {
-    console.error(error); // Log the error to the console
+    console.error(error);
     return NextResponse.json({
-      message: `Failed to create workout: ${error}`,
+      message: `Failed to create workout. ${error}`,
       status: 500,
     });
   }
@@ -72,25 +105,26 @@ export async function DELETE(req: Request) {
       throw new Error("Failed to connect to the database");
     }
 
-    const { w_id } = await req.json();
+    const { username, w_name } = await req.json();
 
-    // Delete workout in Supabase database
+    //need to check if workout exists before deleting first, missing this rn
+    //confused on how to check which user profile im in to see their specific workouts and what to delete
+
     const { data, error } = await db
       .from("workout_info")
       .delete()
-      .match({ w_id: w_id });
+      .match({ username: username, w_name: w_name });
 
     if (error) {
       throw error;
     }
 
-    // Return success message in response
     return NextResponse.json({
       message: "Workout deleted",
       status: 200,
     });
   } catch (error) {
-    console.error(error); // Log the error to the console
+    console.error(error);
     return NextResponse.json({
       message: `Failed to delete workout. Please try again later`,
       status: 500,
