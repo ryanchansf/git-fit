@@ -72,7 +72,6 @@ export async function POST(req: Request) {
 
     const { username, duration, difficulty, tags, w_name } = await req.json();
 
-    // Check if any of the required parameters are missing
     if (!username || !duration || !difficulty || !tags || !w_name) {
       throw new Error("Missing required parameters");
     }
@@ -132,6 +131,36 @@ export async function DELETE(req: Request) {
     console.error(error);
     return NextResponse.json({
       message: `Failed to delete workout. Please try again later`,
+      status: 500,
+    });
+  }
+}
+
+// Update Workout
+export async function PUT(req: NextRequest) {
+  try {
+    const db = connectDB();
+
+    const { w_id, username, duration, difficulty, tags, w_name } =
+      await req.json();
+
+    const { error } = await db
+      .from("workout_info")
+      .update({ username, duration, difficulty, tags, w_name })
+      .match({ w_id });
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({
+      message: "Workout updated",
+      status: 200,
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({
+      message: `Failed to update workout. ${error}`,
       status: 500,
     });
   }

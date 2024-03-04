@@ -83,7 +83,6 @@ export async function POST(req: Request) {
       .insert([{ exercise_id, w_id, reps }] as any);
 
     if (workout_error) {
-      // console.log(workout_error)
       throw workout_error;
     }
 
