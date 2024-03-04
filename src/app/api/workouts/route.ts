@@ -1,6 +1,7 @@
 import connectDB from "@/database/db";
 import { NextRequest, NextResponse } from "next/server";
 
+//Search all Workouts
 export async function GET(req: NextRequest) {
   try {
     const db = connectDB();
@@ -24,6 +25,7 @@ export async function GET(req: NextRequest) {
     if (difficulty) {
       query = query.ilike("difficulty", difficulty);
     }
+    //confusion on how to search tags bc it's an array
     if (tags) {
       query = query.eq("tags", tags);
     }
@@ -57,6 +59,9 @@ export async function GET(req: NextRequest) {
     });
   }
 }
+
+//Add workout to user profile
+//Do i need to check which user profile I am in and if so, how?
 
 export async function POST(req: Request) {
   try {
@@ -97,6 +102,7 @@ export async function POST(req: Request) {
   }
 }
 
+//Delete Workout
 export async function DELETE(req: Request) {
   try {
     const db = connectDB();
