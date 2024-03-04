@@ -49,13 +49,11 @@ import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 
 // TODO:
-// Cards:
-//   - Fetch cards from database
-//   - Link exercises to cards
-// Add Workout popup:
-//   - Use usernames when adding new workouts (From Ryan's commit)
+//   - Link exercises to cards (talk to ananya)
+//   - Make edit and delete buttons work
 //   - Disable "Add workout" button until form errors are corrected
 //   - Clear form fields after submitting form
+//   - Make "Delete workout" button functional
 
 const formSchema = z.object({
   name: z
@@ -154,7 +152,7 @@ export default function Home() {
               <DialogTitle>Add workout</DialogTitle>
               <DialogDescription>
                 Add new workouts here. Click &quot;add workout&quot; when
-                you&apos;re done.
+                you&apos;re done, or X to cancel.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -253,18 +251,146 @@ export default function Home() {
               <div className="flex justify-between items-center">
                 <CardTitle>{card.title}</CardTitle>
                 <div className="flex gap-2">
-                  <Button className="bg-accent" size="icon">
-                    <i
-                      className="fa-solid fa-pen-to-square"
-                      style={{ color: "hsl(var(--primary))" }}
-                    />
-                  </Button>
-                  <Button className="bg-accent" size="icon">
-                    <i
-                      className="fa-solid fa-trash"
-                      style={{ color: "hsl(var(--primary))" }}
-                    />
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="bg-accent" size="icon">
+                        <i
+                          className="fa-solid fa-pen-to-square"
+                          style={{ color: "hsl(var(--primary))" }}
+                        />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Edit workout</DialogTitle>
+                        <DialogDescription>
+                          Make changes to your workout here. Click &quot;submit
+                          changes&quot; when you&apos;re done, or X to cancel.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <Form {...form}>
+                        <form
+                          onSubmit={form.handleSubmit(onSubmit)}
+                          className="space-y-8"
+                        >
+                          <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Workout name</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Kalf Killer" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="duration"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Duration (min)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Integer 1 - 999"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="difficulty"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Difficulty</FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="Easy">Easy</SelectItem>
+                                    <SelectItem value="Medium">
+                                      Medium
+                                    </SelectItem>
+                                    <SelectItem value="Hard">Hard</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="tags"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Add tags</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Biceps" {...field} />
+                                </FormControl>
+                                <FormDescription>
+                                  Add any relevant tags, like &quot;arms&quot;
+                                  or &quot;calves,&quot; separated by a comma.
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <DialogFooter>
+                            <DialogClose asChild>
+                              <Button type="submit" className="bg-secondary">
+                                Submit changes
+                                <i
+                                  className="fa-solid"
+                                  style={{ color: "hsl(var(--primary))" }}
+                                />
+                              </Button>
+                            </DialogClose>
+                          </DialogFooter>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="bg-accent" size="icon">
+                        <i
+                          className="fa-solid fa-trash"
+                          style={{ color: "hsl(var(--primary))" }}
+                        />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Delete workout</DialogTitle>
+                        <DialogDescription>
+                          Are you sure you want to delete this workout? This
+                          action cannot be undone.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button type="submit" className="bg-destructive">
+                            Delete workout
+                            <i
+                              className="fa-solid"
+                              style={{ color: "hsl(var(--primary))" }}
+                            />
+                          </Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
               <CardDescription>{card.description}</CardDescription>
