@@ -16,12 +16,11 @@ export async function GET(req: NextRequest) {
     if (exercise_name) {
       query = query.ilike("exercise_name", exercise_name);
     }
-    // modify search for muscle_groups and equpiments since they are arrays
     if (muscle_groups) {
-      query = query.eq("muscle_groups", muscle_groups);
+      query = query.contains("muscle_groups", [muscle_groups]);
     }
     if (equipment) {
-      query = query.eq("equipment", equipment);
+      query = query.contains("equipment", [equipment]);
     }
 
     ({ data, error } = await query);
