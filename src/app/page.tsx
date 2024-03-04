@@ -43,89 +43,19 @@ import connectDB from "@/database/db";
 import { NextResponse } from "next/server";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import WelcomeHeader from "@/components/welcomeHeader";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 
 // TODO:
-// General:
+// Cards:
 //   - Fetch cards from database
+//   - Link exercises to cards
 // Add Workout popup:
 //   - Use usernames when adding new workouts (From Ryan's commit)
 //   - Disable "Add workout" button until form errors are corrected
 //   - Clear form fields after submitting form
-
-// Not functional
-// async function getWorkouts() {
-//   const newCard: Object[] = [];
-//   await fetch("/api/workouts")
-//     .then((response) => response.json())
-//     .then((data) => {
-//       for (const obj of data.workouts) {
-//         newCard.push({
-//           title: obj.w_name,
-//           time: obj.duration,
-//           difficulty: obj.difficulty,
-//         });
-//       }
-//     });
-//   const resp = (await fetch("/api/workouts"));
-//   const data = resp.json();
-//   console.log(data);
-//   return data;
-// }
-
-const cardData = [
-  {
-    title: "Push 1",
-    description: "Created by John Doe on 1/17/2024",
-    time: "Total Time: 1h 30m",
-    exercises: [
-      { name: "Bench Press", sets: "4x8", rest: "2 min" },
-      { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-      { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-    ],
-  },
-  {
-    title: "Push 1",
-    description: "Created by John Doe on 1/17/2024",
-    time: "Total Time: 1h 30m",
-    exercises: [
-      { name: "Bench Press", sets: "4x8", rest: "2 min" },
-      { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-      { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-    ],
-  },
-  {
-    title: "Push 1",
-    description: "Created by John Doe on 1/17/2024",
-    time: "Total Time: 1h 30m",
-    exercises: [
-      { name: "Bench Press", sets: "4x8", rest: "2 min" },
-      { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-      { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-    ],
-  },
-  {
-    title: "Push 1",
-    description: "Created by John Doe on 1/17/2024",
-    time: "Total Time: 1h 30m",
-    exercises: [
-      { name: "Bench Press", sets: "4x8", rest: "2 min" },
-      { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-      { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-    ],
-  },
-];
 
 const formSchema = z.object({
   name: z
@@ -145,6 +75,9 @@ const formSchema = z.object({
 });
 
 export default function Home() {
+  const { data: session } = useSession();
+  const username = session?.user?.name;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -155,7 +88,7 @@ export default function Home() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const message = {
-      username: "caroline_calves",
+      username: username,
       duration: values.duration,
       difficulty: values.difficulty,
       tags: values.tags.replaceAll(" ", "").split(","),
@@ -168,8 +101,40 @@ export default function Home() {
       },
       body: JSON.stringify(message),
     });
+    //setCardData([...,message]);
     return promise;
   }
+
+  async function getCardData() {
+    const newCard: Object[] = [];
+    await fetch("/api/workouts")
+      .then((response) => response.json())
+      .then((data) => {
+        for (const obj of data.workouts) {
+          if (obj.username === username) {
+            newCard.push({
+              title: obj.w_name,
+              description: `Difficulty: ${obj.difficulty}`,
+              time: `Total time: ${obj.duration} min`,
+              exercises: [
+                { name: "Bench Press", sets: "4x8", rest: "2 min" },
+                { name: "Overhead Press", sets: "4x8", rest: "2 min" },
+                { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
+                { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
+                { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
+              ],
+            });
+          }
+        }
+      });
+    setCardData(newCard);
+  }
+
+  const [cardData, setCardData] = useState<any>([]);
+
+  useEffect(() => {
+    getCardData();
+  });
 
   return (
     <div className="flex flex-col gap-5">
@@ -282,7 +247,7 @@ export default function Home() {
         </Dialog>
       </div>
       <div className="grid grid-cols-3 gap-4 px-20">
-        {cardData.map((card, index) => (
+        {cardData.map((card: any, index: any) => (
           <Card key={index}>
             <CardHeader>
               <div className="flex justify-between items-center">
@@ -308,7 +273,7 @@ export default function Home() {
               <div className="flex items-center space-x-4 rounded-md border p-4">
                 <div className="flex-1 space-y-1">
                   <p className="text-lg font-medium leading-none">Exercises</p>
-                  {card.exercises.map((exercise, exerciseIndex) => (
+                  {card.exercises.map((exercise: any, exerciseIndex: any) => (
                     <div key={exerciseIndex} className="flex gap-3">
                       <p>
                         {exerciseIndex + 1}. {exercise.name}
