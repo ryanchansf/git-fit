@@ -101,9 +101,7 @@ export async function DELETE(req: Request) {
   try {
     const db = connectDB();
     const url = new URL(req.url ? req.url : "invalid");
-    const username = url.searchParams.get("username");
     const w_id = url.searchParams.get("w_id");
-    const w_name = url.searchParams.get("w_name");
 
     if (!db) {
       throw new Error("Failed to connect to the database");
@@ -112,20 +110,16 @@ export async function DELETE(req: Request) {
     const { data: existingWorkouts, error: queryError } = await db
       .from("workout_info")
       .select("*")
-      .eq("username", username)
-      .eq("w_name", w_name)
       .eq("w_id", w_id);
 
     if (existingWorkouts.length == 0) {
-      throw new Error(
-        `Workout with ID ${w_id} and name ${w_name} does not exist for user ${username}`,
-      );
+      throw new Error(`Workout with ID ${w_id} does not exist for user`);
     }
 
     const { error: deleteError } = await db
       .from("workout_info")
       .delete()
-      .match({ username, w_name, w_id });
+      .match({ w_id });
 
     if (deleteError) {
       throw deleteError;
