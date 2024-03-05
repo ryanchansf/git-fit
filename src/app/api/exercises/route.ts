@@ -74,10 +74,6 @@ export async function POST(req: Request) {
       throw exercise_error;
     }
 
-    if (exercise_info.length > 0) {
-      throw new Error("The exercise is already in the workout");
-    }
-
     const { data: workout_info, error: workout_error } = await db
       .from("workouts")
       .insert([{ exercise_id, w_id, reps }] as any);
@@ -93,7 +89,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error(error);
     return NextResponse.json({
-      message: `Failed to add exercise. Please try again later`,
+      message: `Failed to add exercise.`,
       status: 500,
     });
   }
@@ -113,7 +109,7 @@ export async function DELETE(req: Request) {
     const { data, error } = await db
       .from("workouts")
       .delete()
-      .match({ exercise_id: exercise_id });
+      .match({ exercise_id: exercise_id, w_id: w_id });
 
     if (error) {
       throw error;
@@ -126,7 +122,35 @@ export async function DELETE(req: Request) {
   } catch (error) {
     console.error(error);
     return NextResponse.json({
-      message: `Failed to delete exercise from workout: ${error}`,
+      message: `Failed to delete exercise from workout. ${error}`,
+      status: 500,
+    });
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const db = connectDB();
+
+    const { exercise_id, w_id, reps } = await req.json();
+
+    const { error } = await db
+      .from("workouts")
+      .update({ exercise_id, w_id, reps })
+      .match({ exercise_id, w_id });
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({
+      message: "Workout updated",
+      status: 200,
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({
+      message: `Failed to update workout. ${error}`,
       status: 500,
     });
   }

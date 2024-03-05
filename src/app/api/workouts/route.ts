@@ -59,9 +59,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-//Add workout to user profile
-//Do I need to check which user profile I am in and if so, how?
-
 export async function POST(req: Request) {
   try {
     const db = connectDB();
@@ -109,15 +106,13 @@ export async function DELETE(req: Request) {
       throw new Error("Failed to connect to the database");
     }
 
-    const { username, w_name } = await req.json();
+    const { username, w_name, w_id } = await req.json();
 
     //need to check if workout exists before deleting first, missing this rn
-    //confused on how to check which user profile im in to see their specific workouts and what to delete
-
     const { data, error } = await db
       .from("workout_info")
       .delete()
-      .match({ username: username, w_name: w_name });
+      .match({ username: username, w_name: w_name, w_id: w_id });
 
     if (error) {
       throw error;
