@@ -43,89 +43,17 @@ import connectDB from "@/database/db";
 import { NextResponse } from "next/server";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import WelcomeHeader from "@/components/welcomeHeader";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 
 // TODO:
-// General:
-//   - Fetch cards from database
-// Add Workout popup:
-//   - Use usernames when adding new workouts (From Ryan's commit)
+//   - Link exercises to cards (talk to ananya)
+//   - Make edit button work
 //   - Disable "Add workout" button until form errors are corrected
 //   - Clear form fields after submitting form
-
-// Not functional
-// async function getWorkouts() {
-//   const newCard: Object[] = [];
-//   await fetch("/api/workouts")
-//     .then((response) => response.json())
-//     .then((data) => {
-//       for (const obj of data.workouts) {
-//         newCard.push({
-//           title: obj.w_name,
-//           time: obj.duration,
-//           difficulty: obj.difficulty,
-//         });
-//       }
-//     });
-//   const resp = (await fetch("/api/workouts"));
-//   const data = resp.json();
-//   console.log(data);
-//   return data;
-// }
-
-const cardData = [
-  {
-    title: "Push 1",
-    description: "Created by John Doe on 1/17/2024",
-    time: "Total Time: 1h 30m",
-    exercises: [
-      { name: "Bench Press", sets: "4x8", rest: "2 min" },
-      { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-      { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-    ],
-  },
-  {
-    title: "Push 1",
-    description: "Created by John Doe on 1/17/2024",
-    time: "Total Time: 1h 30m",
-    exercises: [
-      { name: "Bench Press", sets: "4x8", rest: "2 min" },
-      { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-      { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-    ],
-  },
-  {
-    title: "Push 1",
-    description: "Created by John Doe on 1/17/2024",
-    time: "Total Time: 1h 30m",
-    exercises: [
-      { name: "Bench Press", sets: "4x8", rest: "2 min" },
-      { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-      { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-    ],
-  },
-  {
-    title: "Push 1",
-    description: "Created by John Doe on 1/17/2024",
-    time: "Total Time: 1h 30m",
-    exercises: [
-      { name: "Bench Press", sets: "4x8", rest: "2 min" },
-      { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-      { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-      { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-    ],
-  },
-];
+//   - Finish onSubmitEditWorkout function
 
 const formSchema = z.object({
   name: z
@@ -145,19 +73,29 @@ const formSchema = z.object({
 });
 
 export default function Home() {
+  const { data: session } = useSession();
+  const username = session?.user?.name;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
+      duration: "",
       difficulty: "Medium",
+      tags: "",
     },
+    // Show errors immediately
     mode: "onChange",
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  //const { formState: 2{ errors, isDirty, isValid } } = useForm();
+
+  async function onSubmitAddWorkout(values: z.infer<typeof formSchema>) {
     const message = {
-      username: "caroline_calves",
+      username: username,
       duration: values.duration,
       difficulty: values.difficulty,
+      // Extract individual tags by removing spaces and splitting along commas
       tags: values.tags.replaceAll(" ", "").split(","),
       w_name: values.name,
     };
@@ -168,8 +106,81 @@ export default function Home() {
       },
       body: JSON.stringify(message),
     });
+    // Trigger card reload
+    setCardChange(cardChange + 1);
     return promise;
   }
+
+  async function onSubmitEditWorkout(values: z.infer<typeof formSchema>) {
+    const message = {
+      //w_id: ,
+      username: username,
+      duration: values.duration,
+      difficulty: values.difficulty,
+      // Extract individual tags by removing spaces and splitting along commas
+      tags: values.tags.replaceAll(" ", "").split(","),
+      w_name: values.name,
+    };
+    const promise = await fetch("/api/workouts", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    });
+    // Trigger card reload
+    setCardChange(cardChange + 1);
+    return promise;
+  }
+
+  async function handleDeleteClick(cardTitle: any) {
+    // Extract workout id from card title
+    const w_id = cardTitle.split(":")[0].substring(1);
+    const promise = await fetch(`/api/workouts?w_id=${w_id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    // Trigger card reload
+    setCardChange(cardChange + 1);
+    return promise;
+  }
+
+  const [cardData, setCardData] = useState<any>([]);
+  const [cardChange, setCardChange] = useState(0);
+
+  // Reload cards if deletions, edits, additions are made
+  useEffect(() => {
+    async function getCardData() {
+      const cardData: Object[] = [];
+      await fetch(`/api/workouts?username=${session?.user?.name}`)
+        .then((response) => response.json())
+        .then((message) => {
+          // Order by workout ID, newest first
+          for (const obj of message.data.sort(
+            (a: any, b: any) => b.w_id - a.w_id,
+          )) {
+            cardData.push({
+              title: `#${obj.w_id}: ${obj.w_name}`,
+              description: `Difficulty: ${obj.difficulty}`,
+              time: `Total time: ${obj.duration} min`,
+              exercises: [
+                { name: "Bench Press", sets: "4x8", rest: "2 min" },
+                { name: "Overhead Press", sets: "4x8", rest: "2 min" },
+                { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
+                { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
+                { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
+              ],
+            });
+          }
+        });
+      setCardData(cardData);
+    }
+    if (session?.user?.name) {
+      getCardData();
+    }
+  }, [cardChange, session?.user?.name]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -189,12 +200,12 @@ export default function Home() {
               <DialogTitle>Add workout</DialogTitle>
               <DialogDescription>
                 Add new workouts here. Click &quot;add workout&quot; when
-                you&apos;re done.
+                you&apos;re done, or X to cancel.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={form.handleSubmit(onSubmitAddWorkout)}
                 className="space-y-8"
               >
                 <FormField
@@ -282,24 +293,156 @@ export default function Home() {
         </Dialog>
       </div>
       <div className="grid grid-cols-3 gap-4 px-20">
-        {cardData.map((card, index) => (
+        {cardData.map((card: any, index: any) => (
           <Card key={index}>
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>{card.title}</CardTitle>
                 <div className="flex gap-2">
-                  <Button className="bg-accent" size="icon">
-                    <i
-                      className="fa-solid fa-pen-to-square"
-                      style={{ color: "hsl(var(--primary))" }}
-                    />
-                  </Button>
-                  <Button className="bg-accent" size="icon">
-                    <i
-                      className="fa-solid fa-trash"
-                      style={{ color: "hsl(var(--primary))" }}
-                    />
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="bg-accent" size="icon">
+                        <i
+                          className="fa-solid fa-pen-to-square"
+                          style={{ color: "hsl(var(--primary))" }}
+                        />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Edit workout</DialogTitle>
+                        <DialogDescription>
+                          Make changes to your workout here. Click &quot;submit
+                          changes&quot; when you&apos;re done, or X to cancel.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <Form {...form}>
+                        <form
+                          // cardTitle.split(':')[0].substring(1)
+                          onSubmit={form.handleSubmit(onSubmitEditWorkout)}
+                          className="space-y-8"
+                        >
+                          <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Workout name</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder={card.title.split(": ")[1]}
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="duration"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Duration (min)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder={card.duration}
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="difficulty"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Difficulty</FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="Easy">Easy</SelectItem>
+                                    <SelectItem value="Medium">
+                                      Medium
+                                    </SelectItem>
+                                    <SelectItem value="Hard">Hard</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="tags"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Tags</FormLabel>
+                                <FormControl>
+                                  <Input placeholder={card.tags} {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <DialogFooter>
+                            <DialogClose asChild>
+                              <Button type="submit" className="bg-secondary">
+                                Submit changes
+                                <i
+                                  className="fa-solid"
+                                  style={{ color: "hsl(var(--primary))" }}
+                                />
+                              </Button>
+                            </DialogClose>
+                          </DialogFooter>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="bg-accent" size="icon">
+                        <i
+                          className="fa-solid fa-trash"
+                          style={{ color: "hsl(var(--primary))" }}
+                        />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Delete workout</DialogTitle>
+                        <DialogDescription>
+                          Are you sure you want to delete this workout? This
+                          action cannot be undone.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button
+                            type="submit"
+                            className="bg-destructive"
+                            onClick={() => handleDeleteClick(card.title)}
+                          >
+                            Delete workout
+                            <i
+                              className="fa-solid"
+                              style={{ color: "hsl(var(--primary))" }}
+                            />
+                          </Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
               <CardDescription>{card.description}</CardDescription>
@@ -308,7 +451,7 @@ export default function Home() {
               <div className="flex items-center space-x-4 rounded-md border p-4">
                 <div className="flex-1 space-y-1">
                   <p className="text-lg font-medium leading-none">Exercises</p>
-                  {card.exercises.map((exercise, exerciseIndex) => (
+                  {card.exercises.map((exercise: any, exerciseIndex: any) => (
                     <div key={exerciseIndex} className="flex gap-3">
                       <p>
                         {exerciseIndex + 1}. {exercise.name}
