@@ -17,3 +17,5 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+        env:
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
