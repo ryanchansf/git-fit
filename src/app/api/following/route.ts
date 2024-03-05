@@ -45,15 +45,18 @@ export async function GET(req: NextRequest) {
     });
   }
 }
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const db = connectDB();
+    const url = new URL(req.url ? req.url : "invalid");
+    const follower = url.searchParams.get("username");
+    console.log("backend post:", follower);
 
     if (!db) {
       throw new Error("Failed to connect to the database");
     }
 
-    const { follower, following } = await req.json();
+    const { following } = await req.json();
     console.log("follower: ", follower);
     console.log("following: ", following);
     // make sure FOLLOWER exist
