@@ -147,40 +147,40 @@ export default function Home() {
     return promise;
   }
 
-  // TODO: Get exercises from tables
-  async function getCardData() {
-    const cardData: Object[] = [];
-    await fetch(`/api/workouts?username=${username}`)
-      .then((response) => response.json())
-      .then((message) => {
-        // Order by workout ID, newest first
-        for (const obj of message.data.sort(
-          (a: any, b: any) => b.w_id - a.w_id,
-        )) {
-          cardData.push({
-            title: `#${obj.w_id}: ${obj.w_name}`,
-            description: `Difficulty: ${obj.difficulty}`,
-            time: `Total time: ${obj.duration} min`,
-            exercises: [
-              { name: "Bench Press", sets: "4x8", rest: "2 min" },
-              { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-              { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-              { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-              { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-            ],
-          });
-        }
-      });
-    setCardData(cardData);
-  }
-
   const [cardData, setCardData] = useState<any>([]);
   const [cardChange, setCardChange] = useState(0);
 
   // Reload cards if deletions, edits, additions are made
   useEffect(() => {
-    getCardData();
-  }, [cardChange]);
+    async function getCardData() {
+      const cardData: Object[] = [];
+      await fetch(`/api/workouts?username=${session?.user?.name}`)
+        .then((response) => response.json())
+        .then((message) => {
+          // Order by workout ID, newest first
+          for (const obj of message.data.sort(
+            (a: any, b: any) => b.w_id - a.w_id,
+          )) {
+            cardData.push({
+              title: `#${obj.w_id}: ${obj.w_name}`,
+              description: `Difficulty: ${obj.difficulty}`,
+              time: `Total time: ${obj.duration} min`,
+              exercises: [
+                { name: "Bench Press", sets: "4x8", rest: "2 min" },
+                { name: "Overhead Press", sets: "4x8", rest: "2 min" },
+                { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
+                { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
+                { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
+              ],
+            });
+          }
+        });
+      setCardData(cardData);
+    }
+    if (session?.user?.name) {
+      getCardData();
+    }
+  }, [cardChange, session?.user?.name]);
 
   return (
     <div className="flex flex-col gap-5">
