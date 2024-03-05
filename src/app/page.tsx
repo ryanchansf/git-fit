@@ -153,7 +153,7 @@ export default function Home() {
     await fetch(`/api/workouts?username=${username}`)
       .then((response) => response.json())
       .then((message) => {
-        //                                   Order by workout ID, newest first
+        // Order by workout ID, newest first
         for (const obj of message.data.sort(
           (a: any, b: any) => b.w_id - a.w_id,
         )) {
@@ -175,7 +175,7 @@ export default function Home() {
   }
 
   const [cardData, setCardData] = useState<any>([]);
-  const [cardChange, setCardChange] = useState<any>(0);
+  const [cardChange, setCardChange] = useState(0);
 
   // Reload cards if deletions, edits, additions are made
   useEffect(() => {
