@@ -1,7 +1,6 @@
 import connectDB from "@/database/db";
 import { NextRequest, NextResponse } from "next/server";
 
-
 //Search all Workouts
 export async function GET(req: NextRequest) {
   try {
