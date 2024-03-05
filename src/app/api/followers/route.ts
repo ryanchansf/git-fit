@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     console.log("backend.data: ", data);
     // Return the workouts in the response
     return NextResponse.json({
-      message: "Following displayed",
+      message: "Followers displayed",
       status: 200,
       data,
     });
@@ -120,30 +120,3 @@ export async function POST(req: Request) {
     });
   }
 }
-// export async function GET() {
-//   try {
-//     const db = connectDB();
-
-//     if (!db) {
-//       throw new Error("Failed to connect to the database");
-//     }
-
-//     const { data: data, error } = await db.from("data").select("*");
-
-//     if (error) {
-//       throw error;
-//     }
-//     // Return the workouts in the response
-//     return NextResponse.json({
-//       message: "Following displayed",
-//       status: 200,
-//       data,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     return NextResponse.json({
-//       message: `Failed to display exercises: ${error}`,
-//       status: 500,
-//     });
-//   }
-// }

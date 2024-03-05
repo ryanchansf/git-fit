@@ -15,10 +15,13 @@ export default function Followers() {
 
   const getfollowerData = useCallback(async () => {
     try {
-      const newFollowing = [];
+      const newFollower = [];
       const response = await fetch(
         `/api/followers?username=${encodeURIComponent(username)}`,
       );
+      if (!username) {
+        redirect("/register");
+      }
       if (!response.ok) {
         throw new Error("Failed to fetch follower data");
       }
@@ -28,14 +31,14 @@ export default function Followers() {
       if (responseData.data && Array.isArray(responseData.data)) {
         for (const obj of responseData.data) {
           console.log("obj: ", obj);
-          newFollowing.push({
+          newFollower.push({
             img: "hgsdfaj",
             username: obj.follower,
           });
         }
       }
 
-      setfollowerData(newFollowing);
+      setfollowerData(newFollower);
     } catch (error) {
       console.error("Error fetching follower data:", error);
     }
