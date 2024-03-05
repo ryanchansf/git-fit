@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       throw error;
     }
     console.log("returning data: ", data);
-    // Return the users in the response
+    // Return the user(s) in the response
     return NextResponse.json({
       message: "Users retrieved",
       status: 200,
