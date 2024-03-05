@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,10 +8,73 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import connectDB from "@/database/db";
+import { NextResponse } from "next/server";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import React from "react";
 import WelcomeHeader from "@/components/welcomeHeader";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+
+// TODO:
+// General:
+//   - Fetch cards from database
+// Add Workout popup:
+//   - Use usernames when adding new workouts (From Ryan's commit)
+//   - Disable "Add workout" button until form errors are corrected
+//   - Clear form fields after submitting form
+
+// Not functional
+// async function getWorkouts() {
+//   const newCard: Object[] = [];
+//   await fetch("/api/workouts")
+//     .then((response) => response.json())
+//     .then((data) => {
+//       for (const obj of data.workouts) {
+//         newCard.push({
+//           title: obj.w_name,
+//           time: obj.duration,
+//           difficulty: obj.difficulty,
+//         });
+//       }
+//     });
+//   const resp = (await fetch("/api/workouts"));
+//   const data = resp.json();
+//   console.log(data);
+//   return data;
+// }
 
 const cardData = [
   {
@@ -63,17 +127,159 @@ const cardData = [
   },
 ];
 
-export default async function Home() {
+const formSchema = z.object({
+  name: z
+    .string()
+    .min(2, { message: "Workout name must be at least 2 characters." })
+    .max(20, { message: "Workout name must be less than 20 characters." }),
+  duration: z
+    .string()
+    .min(1, { message: "Duration must be an integer greater than 0" })
+    .max(3, { message: "Duration must be an integer less than 1000" })
+    // Regex to detect if the input is an integer
+    .refine((str) => /^\d+$/.test(str), {
+      message: "Duration must be an integer",
+    }),
+  difficulty: z.enum(["Easy", "Medium", "Hard"]),
+  tags: z.string().max(100, { message: "No more than 100 characters allowed" }),
+});
+
+export default function Home() {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      difficulty: "Medium",
+    },
+    mode: "onChange",
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const message = {
+      username: "caroline_calves",
+      duration: values.duration,
+      difficulty: values.difficulty,
+      tags: values.tags.replaceAll(" ", "").split(","),
+      w_name: values.name,
+    };
+    const promise = await fetch("/api/workouts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    });
+    return promise;
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex justify-between px-100">
         <WelcomeHeader />
-        <Button className="bg-accent" size="lg">
-          <i
-            className="fa-solid fa-plus"
-            style={{ color: "hsl(var(--primary))" }}
-          />
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-accent" size="lg">
+              <i
+                className="fa-solid fa-plus"
+                style={{ color: "hsl(var(--primary))" }}
+              />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add workout</DialogTitle>
+              <DialogDescription>
+                Add new workouts here. Click &quot;add workout&quot; when
+                you&apos;re done.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8"
+              >
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Workout name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Kalf Killer" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="duration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Duration (min)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Integer 1 - 999" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="difficulty"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Difficulty</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Easy">Easy</SelectItem>
+                          <SelectItem value="Medium">Medium</SelectItem>
+                          <SelectItem value="Hard">Hard</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Add tags</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Biceps" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Add any relevant tags, like &quot;arms&quot; or
+                        &quot;calves,&quot; separated by a comma.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="submit" className="bg-secondary">
+                      Add workout
+                      <i
+                        className="fa-solid"
+                        style={{ color: "hsl(var(--primary))" }}
+                      />
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
       <div className="grid grid-cols-3 gap-4 px-20">
         {cardData.map((card, index) => (
