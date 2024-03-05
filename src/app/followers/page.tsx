@@ -9,21 +9,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import { SessionProvider } from "next-auth/react";
 import { NextResponse } from "next/server";
 
-// const followerData = [
-//   {
-//     img: "https://spiritdogtraining.com/wp-content/uploads/2021/01/mini-goldendoodle.jpg",
-//     user_name: "ananya_cool",
-//   },
-//   {
-//     img: "https://media.licdn.com/dms/image/C5603AQGoNK4iqKLkJQ/profile-displayphoto-shrink_800_800/0/1619014750840?e=2147483647&v=beta&t=shtQoIP58TlkxLDlBU--ndMdXKdy-9DE9iOw_8AsP1U",
-//     user_name: "felicia_pilates",
-//   },
-//   {
-//     img: "",
-//     user_name: "caroline_calves",
-//   },
-// ];
-
 export default function Followers() {
   const { data: session } = useSession();
   const username = session?.user?.name;
@@ -40,15 +25,13 @@ export default function Followers() {
       const responseData = await response.json();
       console.log("Response Data:", responseData);
 
-      // Assuming the structure of responseData is { followers: [{ username: string, ...otherProperties }], ...otherProperties }
-      if (responseData.followers && Array.isArray(responseData.followers)) {
-        for (const obj of responseData.followers) {
-          if (obj.username === username) {
-            newFollowing.push({
-              img: "hgsdfaj", // Placeholder image for now, replace with actual image from data
-              username: obj.username, // Assuming you want to use the follower's username here
-            });
-          }
+      if (responseData.data && Array.isArray(responseData.data)) {
+        for (const obj of responseData.data) {
+          console.log("obj: ", obj);
+          newFollowing.push({
+            img: "hgsdfaj",
+            username: obj.follower,
+          });
         }
       }
 
@@ -83,16 +66,17 @@ export default function Followers() {
               key={index}
             >
               <div style={{ marginRight: "15px" }}>
-                {/* Assuming your Avatar component works as expected */}
                 <Avatar>
                   <AvatarImage src={follower.img} />
-                  <AvatarFallback style={{ color: "white" }}>
+                  <AvatarFallback
+                    className="bg-white"
+                    style={{ color: "hsl(var(--accent))" }}
+                  >
                     {follower.username[0]}
                   </AvatarFallback>
                 </Avatar>
               </div>
               <div style={{ marginLeft: "25px" }}>
-                {/* Assuming your Button component works as expected */}
                 <Button type="submit">
                   <i style={{ color: "hsl(var(--primary)" }} />
                   <span style={{ color: "hsl(var(--accent))" }}>
