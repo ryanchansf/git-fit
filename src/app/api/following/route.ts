@@ -121,3 +121,64 @@ export async function POST(req: NextRequest) {
     });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const db = connectDB();
+    const url = new URL(req.url ? req.url : "invalid");
+    const follower = url.searchParams.get("username");
+    console.log("backend post:", follower);
+
+    if (!db) {
+      throw new Error("Failed to connect to the database");
+    }
+
+    const { following } = await req.json();
+    console.log("follower: ", follower);
+    console.log("following: ", following);
+    // make sure FOLLOWER exist
+    const { data: check_follower, error: follower_exists_error } = await db
+      .from("users")
+      .select("*")
+      .match({ username: follower });
+    console.log("check follower: ", check_follower);
+
+    if (!check_follower || check_follower.length === 0) {
+      throw new Error("follower input invalid: user not found");
+    }
+    if (follower_exists_error) {
+      throw follower_exists_error;
+    }
+    //make sure FOLLOWING exists
+    const { data: check_following, error: following_exists_error } = await db
+      .from("users")
+      .select("*")
+      .match({ username: following });
+    console.log("check_following", check_following);
+
+    if (!check_following || check_following.length === 0) {
+      throw new Error("data input invalid: user not found");
+    }
+    if (following_exists_error) {
+      throw following_exists_error;
+    }
+    // delete relationship from the database
+    const { data: del_rel, error: delete_error } = await db
+      .from("following")
+      .delete()
+      .match({ follower: follower, following: following });
+    if (delete_error) {
+      throw delete_error;
+    }
+    return NextResponse.json({
+      message: `${follower} no longer follows ${following}`,
+      status: 200,
+    });
+  } catch (error) {
+    console.error(error); // Log the error to the console
+    return NextResponse.json({
+      message: `Failed to delete remove following`,
+      status: 500,
+    });
+  }
+}
