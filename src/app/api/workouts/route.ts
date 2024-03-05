@@ -137,6 +137,7 @@ export async function DELETE(req: Request) {
 }
 
 // Update Workout
+// What do i do about IDs
 export async function PUT(req: NextRequest) {
   try {
     const db = connectDB();
