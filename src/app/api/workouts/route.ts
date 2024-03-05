@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       throw error;
     }
 
-    if (data.length === 0) {
+    if (data && data.length === 0) {
       return NextResponse.json({
         message: "No workouts found matching the criteria",
         status: 404,
@@ -111,9 +111,9 @@ export async function DELETE(req: Request) {
     const { data: existingWorkouts, error: queryError } = await db
       .from("workout_info")
       .select("*")
-      .eq("w_id", w_id);
+      .eq("w_id", w_id as string);
 
-    if (existingWorkouts.length == 0) {
+    if (existingWorkouts && existingWorkouts.length == 0) {
       throw new Error(`Workout with ID ${w_id} does not exist for user`);
     }
 

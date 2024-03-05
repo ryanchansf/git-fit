@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
         .eq("username", username));
 
       // If no user was found, throw an error
-      if (data.length === 0) {
+      if (data && data.length === 0) {
         throw new Error(`User with username ${username} not found`);
       }
     } else {

@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       throw error;
     }
 
-    if (data.length === 0) {
+    if (data && data.length === 0) {
       return NextResponse.json({
         message: "No exercises found matching the criteria",
         status: 404,
