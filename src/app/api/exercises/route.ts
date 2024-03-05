@@ -128,6 +128,7 @@ export async function DELETE(req: Request) {
   }
 }
 
+// Edit reps for exercise
 export async function PUT(req: NextRequest) {
   try {
     const db = connectDB();

@@ -96,6 +96,7 @@ export async function POST(req: Request) {
     });
   }
 }
+
 //Delete Workout
 export async function DELETE(req: Request) {
   try {
