@@ -57,6 +57,7 @@ const options: AuthOptions = {
             const user = {
               email: data.data[0].email,
               name: data.data[0].username,
+              id: data.data[0].id,
             };
             return user; // to be returned to session
           } else {

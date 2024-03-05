@@ -1,34 +1,56 @@
-import connectDB from "@database/db";
-import { NextResponse } from "next/server";
+import connectDB from "@/database/db";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+//Search all exercises
+export async function GET(req: NextRequest) {
   try {
-    const db = connectDB();
+    const supabase = connectDB();
+    const url = new URL(req.url ? req.url : "invalid");
+    const exercise_name = url.searchParams.get("exercise_name");
+    const muscle_groups = url.searchParams.get("muscle_groups");
+    const equipment = url.searchParams.get("equipment");
 
-    if (!db) {
-      throw new Error("Failed to connect to the database");
+    let data, error;
+    let query = supabase.from("exercises").select("*");
+
+    if (exercise_name) {
+      query = query.ilike("exercise_name", exercise_name);
+    }
+    if (muscle_groups) {
+      query = query.contains("muscle_groups", [muscle_groups]);
+    }
+    if (equipment) {
+      query = query.contains("equipment", [equipment]);
     }
 
-    const { data: exercises, error } = await db.from("exercises").select("*");
+    ({ data, error } = await query);
 
     if (error) {
       throw error;
     }
-    // Return the workouts in the response
+
+    if (data && data.length === 0) {
+      return NextResponse.json({
+        message: "No exercises found matching the criteria",
+        status: 404,
+      });
+    }
+
     return NextResponse.json({
-      message: "Exercises displayed",
+      message: "Exercises retrieved",
       status: 200,
-      exercises,
+      data,
     });
   } catch (error) {
     console.error(error);
     return NextResponse.json({
-      message: `Failed to display exercises: ${error}`,
+      message: `Failed to retrieve exercises: ${error}`,
       status: 500,
     });
   }
 }
 
+// Add an exercise to a workout
 export async function POST(req: Request) {
   try {
     const db = connectDB();
@@ -39,12 +61,10 @@ export async function POST(req: Request) {
 
     const { w_id, exercise_id, reps } = await req.json();
 
-    // Check if all required fields are present
     if (!w_id || !exercise_id || reps === undefined) {
-      throw new Error("Missing required fields in the request body");
+      throw new Error("Missing required inputs");
     }
 
-    // Select exercise based on exercise_id in Supabase database
     const { data: exercise_info, error: exercise_error } = await db
       .from("exercises")
       .select("*")
@@ -54,7 +74,6 @@ export async function POST(req: Request) {
       throw exercise_error;
     }
 
-    // Add exercise to workout based on workout_id
     const { data: workout_info, error: workout_error } = await db
       .from("workouts")
       .insert([{ exercise_id, w_id, reps }] as any);
@@ -63,20 +82,20 @@ export async function POST(req: Request) {
       throw workout_error;
     }
 
-    // Return success message in response
     return NextResponse.json({
       message: "Exercise added",
       status: 200,
     });
   } catch (error) {
-    console.error(error); // Log the error to the console
+    console.error(error);
     return NextResponse.json({
-      message: `Failed to add exercise. Please try again later`,
+      message: `Failed to add exercise.`,
       status: 500,
     });
   }
 }
 
+// Delete Exercise from Workout
 export async function DELETE(req: Request) {
   try {
     const db = connectDB();
@@ -87,25 +106,52 @@ export async function DELETE(req: Request) {
 
     const { exercise_id, w_id } = await req.json();
 
-    // Delete workout in Supabase database
     const { data, error } = await db
       .from("workouts")
       .delete()
-      .match({ exercise_id: exercise_id });
+      .match({ exercise_id: exercise_id, w_id: w_id });
 
     if (error) {
       throw error;
     }
 
-    // Return success message in response
     return NextResponse.json({
       message: "Exercise deleted from workout",
       status: 200,
     });
   } catch (error) {
-    console.error(error); // Log the error to the console
+    console.error(error);
     return NextResponse.json({
-      message: `Failed to delete exercise from workout: ${error}`,
+      message: `Failed to delete exercise from workout. ${error}`,
+      status: 500,
+    });
+  }
+}
+
+// Edit reps for exercise
+export async function PUT(req: NextRequest) {
+  try {
+    const db = connectDB();
+
+    const { exercise_id, w_id, reps } = await req.json();
+
+    const { error } = await db
+      .from("workouts")
+      .update({ exercise_id, w_id, reps })
+      .match({ exercise_id, w_id });
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({
+      message: "Workout updated",
+      status: 200,
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({
+      message: `Failed to update workout. ${error}`,
       status: 500,
     });
   }
