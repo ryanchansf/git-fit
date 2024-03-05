@@ -19,12 +19,14 @@ export default function Navbar() {
         <h1>Home</h1>
       </div>
       <div className="flex flex-col items-center hover:-translate-y-[2px]">
-        <Button variant="link">
-          <i
-            className="fa-solid fa-user-group fa-2x"
-            style={{ color: "hsl(var(--accent))" }}
-          />
-        </Button>
+        <Link href="/friends">
+          <Button variant="link">
+            <i
+              className="fa-solid fa-user-group fa-2x"
+              style={{ color: "hsl(var(--accent))" }}
+            />
+          </Button>
+        </Link>
         <h1>Friends</h1>
       </div>
       <div className="flex flex-col items-center hover:-translate-y-[2px]">
