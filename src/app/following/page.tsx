@@ -8,6 +8,23 @@ import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
 import { SessionProvider } from "next-auth/react";
 import { NextResponse } from "next/server";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Following() {
   const { data: session } = useSession();
@@ -87,6 +104,14 @@ export default function Following() {
                   <span style={{ color: "hsl(var(--accent))" }}>
                     {following.username}
                   </span>
+                </Button>
+              </div>
+              <div style={{ marginLeft: "25px" }}>
+                <Button className="bg-accent" size="icon">
+                  <i
+                    className="fa-solid fa-trash"
+                    style={{ color: "hsl(var(--primary))" }}
+                  />
                 </Button>
               </div>
             </div>
