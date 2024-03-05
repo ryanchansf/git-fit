@@ -96,26 +96,39 @@ export async function POST(req: Request) {
     });
   }
 }
-
 //Delete Workout
 export async function DELETE(req: Request) {
   try {
     const db = connectDB();
+    const url = new URL(req.url ? req.url : "invalid");
+    const username = url.searchParams.get("username");
+    const w_id = url.searchParams.get("w_id");
+    const w_name = url.searchParams.get("w_name");
 
     if (!db) {
       throw new Error("Failed to connect to the database");
     }
 
-    const { username, w_name, w_id } = await req.json();
+    const { data: existingWorkouts, error: queryError } = await db
+      .from("workout_info")
+      .select("*")
+      .eq("username", username)
+      .eq("w_name", w_name)
+      .eq("w_id", w_id);
 
-    //need to check if workout exists before deleting first, missing this rn
-    const { data, error } = await db
+    if (existingWorkouts.length == 0) {
+      throw new Error(
+        `Workout with ID ${w_id} and name ${w_name} does not exist for user ${username}`,
+      );
+    }
+
+    const { error: deleteError } = await db
       .from("workout_info")
       .delete()
-      .match({ username: username, w_name: w_name, w_id: w_id });
+      .match({ username, w_name, w_id });
 
-    if (error) {
-      throw error;
+    if (deleteError) {
+      throw deleteError;
     }
 
     return NextResponse.json({
@@ -125,14 +138,13 @@ export async function DELETE(req: Request) {
   } catch (error) {
     console.error(error);
     return NextResponse.json({
-      message: `Failed to delete workout. Please try again later`,
+      message: `Failed to delete workout. ${error}`,
       status: 500,
     });
   }
 }
 
 // Update Workout
-// What do i do about IDs
 export async function PUT(req: NextRequest) {
   try {
     const db = connectDB();
