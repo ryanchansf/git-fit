@@ -99,14 +99,27 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const db = connectDB();
+    const url = new URL(req.url ? req.url : "invalid");
+    const exercise_id = url.searchParams.get("exercise_id");
+    const w_id = url.searchParams.get("w_id");
 
     if (!db) {
       throw new Error("Failed to connect to the database");
     }
 
-    const { exercise_id, w_id } = await req.json();
+    const { data: existingExercise, error: queryError } = await db
+      .from("workout_info")
+      .select("*")
+      .eq("exercise_id", exercise_id)
+      .eq("w_id", w_id);
 
-    const { data, error } = await db
+    if (!existingExercise || existingExercise.length === 0) {
+      throw new Error(
+        `Exercise with ID ${exercise_id} does not exist in workout ${w_id}`,
+      );
+    }
+
+    const { error } = await db
       .from("workouts")
       .delete()
       .match({ exercise_id: exercise_id, w_id: w_id });

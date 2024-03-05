@@ -111,7 +111,7 @@ export async function DELETE(req: Request) {
     const { data: existingWorkouts, error: queryError } = await db
       .from("workout_info")
       .select("*")
-      .eq("w_id", w_id as string);
+      .eq("w_id", w_id);
 
     if (existingWorkouts && existingWorkouts.length == 0) {
       throw new Error(`Workout with ID ${w_id} does not exist for user`);
