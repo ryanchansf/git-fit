@@ -13,11 +13,11 @@ export default function Followers() {
   const { data: session } = useSession();
   const username = session?.user?.name;
 
-  const getfollowerData = useCallback(async () => {
+  const getFollowerData = useCallback(async () => {
     try {
       const newFollower = [];
       const response = await fetch(
-        `/api/followers?username=${encodeURIComponent(username)}`,
+        `/api/followers?username=${encodeURIComponent(username || "")}`,
       );
       if (!username) {
         redirect("/register");
@@ -38,19 +38,21 @@ export default function Followers() {
         }
       }
 
-      setfollowerData(newFollower);
+      setFollowerData(newFollower);
     } catch (error) {
       console.error("Error fetching follower data:", error);
     }
   }, [username]);
 
-  const [followerData, setfollowerData] = useState([]);
+  const [followerData, setFollowerData] = useState<
+    { img: string; username: string }[]
+  >([]);
 
   useEffect(() => {
     if (session) {
-      getfollowerData();
+      getFollowerData();
     }
-  }, [session, getfollowerData]);
+  }, [session, getFollowerData]);
   return (
     <div className="flex flex-col gap-5">
       <div

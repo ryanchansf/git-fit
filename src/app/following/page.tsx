@@ -17,7 +17,7 @@ export default function Following() {
     try {
       const newFollowing = [];
       const response = await fetch(
-        `/api/following?username=${encodeURIComponent(username)}`,
+        `/api/following?username=${encodeURIComponent(username || "")}`,
       );
       if (!username) {
         redirect("/register");
@@ -44,7 +44,9 @@ export default function Following() {
     }
   }, [username]);
 
-  const [followingData, setfollowingData] = useState([]);
+  const [followingData, setfollowingData] = useState<
+    { img: string; username: string }[]
+  >([]);
 
   useEffect(() => {
     if (session) {
