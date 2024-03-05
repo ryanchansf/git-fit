@@ -50,10 +50,10 @@ import { redirect } from "next/navigation";
 
 // TODO:
 //   - Link exercises to cards (talk to ananya)
-//   - Make edit and delete buttons work
+//   - Make edit button work
 //   - Disable "Add workout" button until form errors are corrected
 //   - Clear form fields after submitting form
-//   - Make "Delete workout" button functional
+//   - Finish onSubmitEditWorkout function
 
 const formSchema = z.object({
   name: z
@@ -79,16 +79,23 @@ export default function Home() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
+      duration: "",
       difficulty: "Medium",
+      tags: "",
     },
+    // Show errors immediately
     mode: "onChange",
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  //const { formState: 2{ errors, isDirty, isValid } } = useForm();
+
+  async function onSubmitAddWorkout(values: z.infer<typeof formSchema>) {
     const message = {
       username: username,
       duration: values.duration,
       difficulty: values.difficulty,
+      // Extract individual tags by removing spaces and splitting along commas
       tags: values.tags.replaceAll(" ", "").split(","),
       w_name: values.name,
     };
@@ -99,40 +106,81 @@ export default function Home() {
       },
       body: JSON.stringify(message),
     });
-    //setCardData([...,message]);
+    // Trigger card reload
+    setCardChange(cardChange + 1);
     return promise;
   }
 
+  async function onSubmitEditWorkout(values: z.infer<typeof formSchema>) {
+    const message = {
+      //w_id: ,
+      username: username,
+      duration: values.duration,
+      difficulty: values.difficulty,
+      // Extract individual tags by removing spaces and splitting along commas
+      tags: values.tags.replaceAll(" ", "").split(","),
+      w_name: values.name,
+    };
+    const promise = await fetch("/api/workouts", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    });
+    // Trigger card reload
+    setCardChange(cardChange + 1);
+    return promise;
+  }
+
+  async function handleDeleteClick(cardTitle: any) {
+    // Extract workout id from card title
+    const w_id = cardTitle.split(":")[0].substring(1);
+    const promise = await fetch(`/api/workouts?w_id=${w_id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    // Trigger card reload
+    setCardChange(cardChange + 1);
+    return promise;
+  }
+
+  // TODO: Get exercises from tables
   async function getCardData() {
-    const newCard: Object[] = [];
-    await fetch("/api/workouts")
+    const cardData: Object[] = [];
+    await fetch(`/api/workouts?username=${username}`)
       .then((response) => response.json())
-      .then((data) => {
-        for (const obj of data.workouts) {
-          if (obj.username === username) {
-            newCard.push({
-              title: obj.w_name,
-              description: `Difficulty: ${obj.difficulty}`,
-              time: `Total time: ${obj.duration} min`,
-              exercises: [
-                { name: "Bench Press", sets: "4x8", rest: "2 min" },
-                { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-                { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-                { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-                { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-              ],
-            });
-          }
+      .then((message) => {
+        //                                   Order by workout ID, newest first
+        for (const obj of message.data.sort(
+          (a: any, b: any) => b.w_id - a.w_id,
+        )) {
+          cardData.push({
+            title: `#${obj.w_id}: ${obj.w_name}`,
+            description: `Difficulty: ${obj.difficulty}`,
+            time: `Total time: ${obj.duration} min`,
+            exercises: [
+              { name: "Bench Press", sets: "4x8", rest: "2 min" },
+              { name: "Overhead Press", sets: "4x8", rest: "2 min" },
+              { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
+              { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
+              { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
+            ],
+          });
         }
       });
-    setCardData(newCard);
+    setCardData(cardData);
   }
 
   const [cardData, setCardData] = useState<any>([]);
+  const [cardChange, setCardChange] = useState<any>(0);
 
+  // Reload cards if deletions, edits, additions are made
   useEffect(() => {
     getCardData();
-  });
+  }, [cardChange]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -157,7 +205,7 @@ export default function Home() {
             </DialogHeader>
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={form.handleSubmit(onSubmitAddWorkout)}
                 className="space-y-8"
               >
                 <FormField
@@ -270,7 +318,8 @@ export default function Home() {
                       </DialogHeader>
                       <Form {...form}>
                         <form
-                          onSubmit={form.handleSubmit(onSubmit)}
+                          // cardTitle.split(':')[0].substring(1)
+                          onSubmit={form.handleSubmit(onSubmitEditWorkout)}
                           className="space-y-8"
                         >
                           <FormField
@@ -280,7 +329,10 @@ export default function Home() {
                               <FormItem>
                                 <FormLabel>Workout name</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Kalf Killer" {...field} />
+                                  <Input
+                                    placeholder={card.title.split(": ")[1]}
+                                    {...field}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -294,7 +346,7 @@ export default function Home() {
                                 <FormLabel>Duration (min)</FormLabel>
                                 <FormControl>
                                   <Input
-                                    placeholder="Integer 1 - 999"
+                                    placeholder={card.duration}
                                     {...field}
                                   />
                                 </FormControl>
@@ -334,14 +386,10 @@ export default function Home() {
                             name="tags"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Add tags</FormLabel>
+                                <FormLabel>Tags</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Biceps" {...field} />
+                                  <Input placeholder={card.tags} {...field} />
                                 </FormControl>
-                                <FormDescription>
-                                  Add any relevant tags, like &quot;arms&quot;
-                                  or &quot;calves,&quot; separated by a comma.
-                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -380,7 +428,11 @@ export default function Home() {
                       </DialogHeader>
                       <DialogFooter>
                         <DialogClose asChild>
-                          <Button type="submit" className="bg-destructive">
+                          <Button
+                            type="submit"
+                            className="bg-destructive"
+                            onClick={() => handleDeleteClick(card.title)}
+                          >
                             Delete workout
                             <i
                               className="fa-solid"
