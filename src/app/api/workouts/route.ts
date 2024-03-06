@@ -108,7 +108,11 @@ export async function DELETE(req: Request) {
       throw new Error("Failed to connect to the database");
     }
 
-    const { data: existingWorkouts, error: queryError } = await db
+    if (!w_id) {
+      throw new Error("w_id is missing in the request");
+    }
+
+    const { data: existingWorkouts, error: workout_error } = await db
       .from("workout_info")
       .select("*")
       .eq("w_id", w_id);
