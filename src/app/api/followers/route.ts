@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     const db = connectDB();
     const url = new URL(req.url ? req.url : "invalid");
     const username = url.searchParams.get("username");
-    console.log("backend:", username);
+    // console.log("backend:", username);
 
     let data, error;
     if (!db) {

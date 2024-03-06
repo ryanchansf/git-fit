@@ -61,15 +61,36 @@ export default function Following() {
     }
   }, [username]);
 
+  async function handleDeleteClick(remove_user: any) {
+    console.log(username, " no longer wants to follow ", remove_user);
+    const message = {
+      following: remove_user,
+    };
+    const promise = await fetch(
+      `/api/following?username=${encodeURIComponent(username || "")}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(message),
+      },
+    );
+    console.log("made it back from api call");
+    setfollowingChange(followingChange + 1);
+    return promise;
+  }
   const [followingData, setfollowingData] = useState<
     { img: string; username: string }[]
   >([]);
+  const [followingChange, setfollowingChange] = useState(0);
 
   useEffect(() => {
     if (session) {
       getfollowingData();
     }
-  }, [session, getfollowingData]);
+  }, [session, getfollowingData, followingChange]);
+
   return (
     <div className="flex flex-col gap-5">
       <div
@@ -111,6 +132,7 @@ export default function Following() {
                   <i
                     className="fa-solid fa-trash"
                     style={{ color: "hsl(var(--primary))" }}
+                    onClick={() => handleDeleteClick(following.username)}
                   />
                 </Button>
               </div>
