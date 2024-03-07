@@ -8,6 +8,23 @@ import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
 import { SessionProvider } from "next-auth/react";
 import { NextResponse } from "next/server";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Followers() {
   const { data: session } = useSession();
