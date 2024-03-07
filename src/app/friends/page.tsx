@@ -18,7 +18,7 @@ export default function Friends() {
         <Following />
       </div>
       <div className="flex-1">
-        <Followers />
+        <Following />
       </div>
     </div>
   );
