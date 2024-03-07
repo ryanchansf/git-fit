@@ -61,6 +61,17 @@ export default function Following() {
     }
   }, [username]);
 
+  const [followingData, setfollowingData] = useState<
+    { img: string; username: string }[]
+  >([]);
+  const [followingChange, setfollowingChange] = useState(0);
+
+  useEffect(() => {
+    if (session) {
+      getfollowingData();
+    }
+  }, [session, getfollowingData, followingChange]);
+
   async function handleDeleteClick(remove_user: any) {
     console.log(username, " no longer wants to follow ", remove_user);
     const message = {
@@ -80,16 +91,6 @@ export default function Following() {
     setfollowingChange(followingChange + 1);
     return promise;
   }
-  const [followingData, setfollowingData] = useState<
-    { img: string; username: string }[]
-  >([]);
-  const [followingChange, setfollowingChange] = useState(0);
-
-  useEffect(() => {
-    if (session) {
-      getfollowingData();
-    }
-  }, [session, getfollowingData, followingChange]);
 
   return (
     <div className="flex flex-col gap-5">
