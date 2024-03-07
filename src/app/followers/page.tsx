@@ -8,57 +8,41 @@ import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
 import { SessionProvider } from "next-auth/react";
 import { NextResponse } from "next/server";
-import {
-  Dialog,
-  DialogContent,
-  DialogClose,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+// Define getFollowerData outside the component
+const getFollowerData = async (username, setFollowerData) => {
+  try {
+    const newFollower = [];
+    const response = await fetch(
+      `/api/followers?username=${encodeURIComponent(username || "")}`,
+    );
+    if (!username) {
+      redirect("/register");
+    }
+    if (!response.ok) {
+      throw new Error("Failed to fetch follower data");
+    }
+    const responseData = await response.json();
+
+    if (responseData.data && Array.isArray(responseData.data)) {
+      for (const obj of responseData.data) {
+        console.log("obj: ", obj);
+        newFollower.push({
+          img: "hgsdfaj",
+          username: obj.follower,
+        });
+      }
+    }
+
+    setFollowerData(newFollower);
+  } catch (error) {
+    console.error("Error fetching follower data:", error);
+  }
+};
 
 export default function Followers() {
   const { data: session } = useSession();
   const username = session?.user?.name;
-
-  const getFollowerData = useCallback(async () => {
-    try {
-      const newFollower = [];
-      const response = await fetch(
-        `/api/followers?username=${encodeURIComponent(username || "")}`,
-      );
-      if (!username) {
-        redirect("/register");
-      }
-      if (!response.ok) {
-        throw new Error("Failed to fetch follower data");
-      }
-      const responseData = await response.json();
-
-      if (responseData.data && Array.isArray(responseData.data)) {
-        for (const obj of responseData.data) {
-          console.log("obj: ", obj);
-          newFollower.push({
-            img: "hgsdfaj",
-            username: obj.follower,
-          });
-        }
-      }
-
-      setFollowerData(newFollower);
-    } catch (error) {
-      console.error("Error fetching follower data:", error);
-    }
-  }, [username]);
 
   const [followerData, setFollowerData] = useState<
     { img: string; username: string }[]
@@ -66,9 +50,10 @@ export default function Followers() {
 
   useEffect(() => {
     if (session) {
-      getFollowerData();
+      getFollowerData(username, setFollowerData);
     }
-  }, [session, getFollowerData]);
+  }, [session, username]);
+
   return (
     <div className="flex flex-col gap-5">
       <div
