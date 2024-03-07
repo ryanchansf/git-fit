@@ -6,10 +6,10 @@ export default function Friends() {
   return (
     <div className="flex">
       <div className="flex-1">
-        <Followers />
+        <Following />
       </div>
       <div className="flex-1">
-        <Followers />
+        <Following />
       </div>
     </div>
   );
