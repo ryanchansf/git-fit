@@ -43,7 +43,7 @@ export default function Following() {
         throw new Error("Failed to fetch following data");
       }
       const responseData = await response.json();
-      console.log("Response Data:", responseData);
+      // console.log("Response Data:", responseData);
 
       if (responseData.data && Array.isArray(responseData.data)) {
         for (const obj of responseData.data) {
@@ -76,7 +76,7 @@ export default function Following() {
         body: JSON.stringify(message),
       },
     );
-    console.log("made it back from api call");
+    //  console.log("made it back from api call");
     setfollowingChange(followingChange + 1);
     return promise;
   }

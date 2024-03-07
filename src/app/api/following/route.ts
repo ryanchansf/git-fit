@@ -123,8 +123,6 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: Request) {
   try {
-    console.log("whaddup from the backend");
-    console.log("request: ", req);
     const db = connectDB();
     const url = new URL(req.url ? req.url : "invalid");
     const follower = url.searchParams.get("username");
@@ -135,8 +133,8 @@ export async function DELETE(req: Request) {
     }
 
     const { following } = await req.json();
-    console.log("follower: ", follower);
-    console.log("following: ", following);
+    // console.log("follower: ", follower);
+    // console.log("following: ", following);
     // make sure FOLLOWER exist
     const { data: check_follower, error: follower_exists_error } = await db
       .from("users")
