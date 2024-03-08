@@ -13,11 +13,11 @@ A tool to help users...well, get fit!
 
 ### Purpose
 
-{Short paragraph description of the app}
+{For gym users who want to explore, save, and generate new workouts. The fitness app is a health and wellness app that provides a streamlined personalized workout experience. Our product offers a free, enhanced social network that allows users to share and collaborate on their exercise journey.}
 
 ### Team
 
-{Insert names}
+{Ananya Thapar, Caroline Koddenberg, Hallie Christopherson, Ryan Chan, Oli Lane}
 
 ## Getting Started And Contributing
 
