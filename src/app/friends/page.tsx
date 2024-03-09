@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import { Session } from "next-auth";
+import Unauthorized from "@/components/unauthorized";
 
 type Props = { username: string; session: Session };
 
@@ -192,12 +192,7 @@ export default function Friends() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center gap-4">
-          <h1 className="text-3xl">Sign in to view this page</h1>
-          <Link href="/register">
-            <Button>Go to sign in</Button>
-          </Link>
-        </div>
+        <Unauthorized />
       )}
     </div>
   );

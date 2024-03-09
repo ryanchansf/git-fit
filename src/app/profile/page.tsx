@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { signOut } from "next-auth/react";
 import { AvatarImage } from "../../components/ui/avatar";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
+import Unauthorized from "@/components/unauthorized";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
@@ -121,12 +121,7 @@ export default function ProfilePage() {
           </div>
         </Card>
       ) : (
-        <div className="flex flex-col items-center justify-center gap-4">
-          <h1 className="text-3xl">Sign in to view this page</h1>
-          <Link href="/register">
-            <Button>Go to sign in</Button>
-          </Link>
-        </div>
+        <Unauthorized />
       )}
     </div>
   );
