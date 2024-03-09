@@ -1,18 +1,15 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import { SessionProvider } from "next-auth/react";
-import { NextResponse } from "next/server";
+import Link from "next/link";
+import { Session } from "next-auth";
 
-function Following() {
-  const { data: session } = useSession();
-  const username = session?.user?.name;
+type Props = { username: string; session: Session };
 
+function Following({ username, session }: Props) {
   const getfollowingData = useCallback(async () => {
     try {
       const newFollowing = [];
@@ -96,10 +93,7 @@ function Following() {
     </div>
   );
 }
-function Followers() {
-  const { data: session } = useSession();
-  const username = session?.user?.name;
-
+function Followers({ username, session }: Props) {
   const getFollowerData = useCallback(async () => {
     try {
       const newFollower = [];
@@ -184,14 +178,27 @@ function Followers() {
   );
 }
 export default function Friends() {
+  const { data: session } = useSession();
+  const username = session?.user?.name;
   return (
-    <div className="flex">
-      <div className="flex-1">
-        <Followers />
-      </div>
-      <div className="flex-1">
-        <Following />
-      </div>
+    <div>
+      {username ? (
+        <div className="flex">
+          <div className="flex-1">
+            <Followers username={username} session={session} />
+          </div>
+          <div className="flex-1">
+            <Following username={username} session={session} />
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-4">
+          <h1 className="text-3xl">Sign in to view this page</h1>
+          <Link href="/register">
+            <Button>Go to sign in</Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
