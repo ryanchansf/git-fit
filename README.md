@@ -21,7 +21,7 @@ Ananya Thapar, Caroline Koddenberg, Hallie Christopherson, Ryan Chan, Oli Lane
 
 ### UI Prototype
 
-Last Updated February 15 - https://www.figma.com/file/3ZronKpnxcDizrocG0yPSW/GIT-FIT-STORYBOARD?type=design&node-id=0%3A1&mode=design&t=f2123qcaK8xZXuYt-1
+Last Updated February 15, 2024 - https://www.figma.com/file/3ZronKpnxcDizrocG0yPSW/GIT-FIT-STORYBOARD?type=design&node-id=0%3A1&mode=design&t=f2123qcaK8xZXuYt-1
 
 ### Diagrams
 
