@@ -3,6 +3,7 @@ import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/Supaba
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
+  const { username } = await req.json();
   try {
     console.log("here bruh");
     const db = connectDB();
@@ -10,7 +11,6 @@ export async function GET(req: Request) {
       throw new Error("Failed to connect to the database");
     }
     console.log("fed up");
-    const { username } = await req.json();
     console.log(username);
     console.log("overthissss");
 
