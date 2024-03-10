@@ -20,8 +20,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Props = { username: string; session: Session };
 
-function Following({ username, session }: Props) {
-  const getFollowingData = useCallback(async () => {
+export function Following() {
+  const { data: session } = useSession();
+  const username = session?.user?.name;
+
+  const getfollowingData = useCallback(async () => {
     try {
       const newFollowing = [];
       const response = await fetch(
@@ -34,7 +37,7 @@ function Following({ username, session }: Props) {
         throw new Error("Failed to fetch following data");
       }
       const responseData = await response.json();
-      console.log("Response Data:", responseData);
+      // console.log("Response Data:", responseData);
 
       if (responseData.data && Array.isArray(responseData.data)) {
         for (const obj of responseData.data) {
@@ -46,21 +49,43 @@ function Following({ username, session }: Props) {
         }
       }
 
-      setFollowingData(newFollowing);
+      setfollowingData(newFollowing);
     } catch (error) {
       console.error("Error fetching followering data:", error);
     }
   }, [username]);
 
-  const [followingData, setFollowingData] = useState<
+  const [followingData, setfollowingData] = useState<
     { img: string; username: string }[]
   >([]);
+  const [followingChange, setfollowingChange] = useState(0);
 
   useEffect(() => {
     if (session) {
-      getFollowingData();
+      getfollowingData();
     }
-  }, [session, getFollowingData]);
+  }, [session, getfollowingData, followingChange]);
+
+  async function handleDeleteClick(remove_user: any) {
+    console.log(username, " no longer wants to follow ", remove_user);
+    const message = {
+      following: remove_user,
+    };
+    const promise = await fetch(
+      `/api/following?username=${encodeURIComponent(username || "")}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(message),
+      },
+    );
+    //  console.log("made it back from api call");
+    setfollowingChange(followingChange + 1);
+    return promise;
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div
@@ -97,6 +122,15 @@ function Following({ username, session }: Props) {
                   </span>
                 </Button>
               </div>
+              <div style={{ marginLeft: "25px" }}>
+                <Button className="bg-accent" size="icon">
+                  <i
+                    className="fa-solid fa-trash"
+                    style={{ color: "hsl(var(--primary))" }}
+                    onClick={() => handleDeleteClick(following.username)}
+                  />
+                </Button>
+              </div>
             </div>
           ),
         )}
@@ -104,6 +138,7 @@ function Following({ username, session }: Props) {
     </div>
   );
 }
+
 function Followers({ username, session }: Props) {
   const getFollowerData = useCallback(async () => {
     try {
