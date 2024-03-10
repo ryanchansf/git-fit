@@ -34,7 +34,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { z } from "zod";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
@@ -47,15 +61,15 @@ import React, { useEffect, useState } from "react";
 import WelcomeHeader from "@/components/welcomeHeader";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 
 // TODO:
-//   - Link exercises to cards (talk to ananya)
+//   - Link exercises to cards
 //   - Make edit button work
-//   - Disable "Add workout" button until form errors are corrected
-//   - Clear form fields after submitting form
-//   - Finish onSubmitEditWorkout function
+//       - Import existing settings as default values
+//   - Attach workout_id to edit workout and add exercise forms
 
-const formSchema = z.object({
+const addWorkoutFormSchema = z.object({
   name: z
     .string()
     .min(2, { message: "Workout name must be at least 2 characters." })
@@ -72,12 +86,52 @@ const formSchema = z.object({
   tags: z.string().max(100, { message: "No more than 100 characters allowed" }),
 });
 
+const editWorkoutFormSchema = z.object({
+  name: z
+    .string()
+    .min(2, { message: "Workout name must be at least 2 characters." })
+    .max(20, { message: "Workout name must be less than 20 characters." }),
+  duration: z
+    .string()
+    .min(1, { message: "Duration must be an integer greater than 0" })
+    .max(3, { message: "Duration must be an integer less than 1000" })
+    // Regex to detect if the input is an integer
+    .refine((str) => /^\d+$/.test(str), {
+      message: "Duration must be an integer",
+    }),
+  difficulty: z.enum(["Easy", "Medium", "Hard"]),
+  tags: z.string().max(100, { message: "No more than 100 characters allowed" }),
+});
+
+const addExerciseFormSchema = z.object({
+  exercise: z.number(),
+  sets: z
+    .string()
+    .min(1, { message: "Sets must be an integer greater than 0" })
+    .max(3, { message: "Sets must be an integer less than 1000" })
+    // Regex to detect if the input is an integer
+    .refine((str) => /^\d+$/.test(str), {
+      message: "Sets must be an integer",
+    }),
+  reps: z
+    .string()
+    .min(1, { message: "Reps must be an integer greater than 0" })
+    .max(3, { message: "Reps must be an integer less than 1000" })
+    // Regex to detect if the input is an integer
+    .refine((str) => /^\d+$/.test(str), {
+      message: "Reps must be an integer",
+    }),
+});
+
 export default function Home() {
   const { data: session } = useSession();
   const username = session?.user?.name;
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState("");
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  // These specify default values that appear in the forms
+  const addWorkoutForm = useForm<z.infer<typeof addWorkoutFormSchema>>({
+    resolver: zodResolver(addWorkoutFormSchema),
     defaultValues: {
       name: "",
       duration: "",
@@ -88,9 +142,43 @@ export default function Home() {
     mode: "onChange",
   });
 
-  //const { formState: 2{ errors, isDirty, isValid } } = useForm();
+  const editWorkoutForm = useForm<z.infer<typeof editWorkoutFormSchema>>({
+    resolver: zodResolver(editWorkoutFormSchema),
+    defaultValues: {
+      name: "",
+      duration: "",
+      difficulty: "Medium",
+      tags: "",
+    },
+    // Show errors immediately
+    mode: "onChange",
+  });
 
-  async function onSubmitAddWorkout(values: z.infer<typeof formSchema>) {
+  const addExerciseForm = useForm<z.infer<typeof addExerciseFormSchema>>({
+    resolver: zodResolver(addExerciseFormSchema),
+    defaultValues: {
+      sets: "",
+      reps: "",
+    },
+    // Show errors immediately
+    mode: "onChange",
+  });
+
+  // Allow the submit buttons to be disabled when the form contains errors
+  const {
+    formState: { isValid: addIsValid },
+  } = addWorkoutForm;
+  const {
+    formState: { isValid: editIsValid },
+  } = editWorkoutForm;
+  const {
+    formState: { isValid: exerciseIsValid },
+  } = addExerciseForm;
+
+  // Handlers for when buttons are clicked
+  async function onSubmitAddWorkout(
+    values: z.infer<typeof addWorkoutFormSchema>,
+  ) {
     const message = {
       username: username,
       duration: values.duration,
@@ -111,7 +199,9 @@ export default function Home() {
     return promise;
   }
 
-  async function onSubmitEditWorkout(values: z.infer<typeof formSchema>) {
+  async function onSubmitEditWorkout(
+    values: z.infer<typeof editWorkoutFormSchema>,
+  ) {
     const message = {
       //w_id: ,
       username: username,
@@ -133,6 +223,26 @@ export default function Home() {
     return promise;
   }
 
+  async function onSubmitAddExercise(
+    values: z.infer<typeof addExerciseFormSchema>,
+  ) {
+    const message = {
+      //w_id: ,
+      username: username,
+      exercise_id: values.exercise,
+      sets: values.sets,
+      reps: values.reps,
+    };
+    const promise = await fetch("/api/exercises", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    });
+    return promise;
+  }
+
   async function handleDeleteClick(cardTitle: any) {
     // Extract workout id from card title
     const w_id = cardTitle.split(":")[0].substring(1);
@@ -147,10 +257,13 @@ export default function Home() {
     return promise;
   }
 
+  // Control which parts of the page get reloaded, and when
   const [cardData, setCardData] = useState<any>([]);
   const [cardChange, setCardChange] = useState(0);
+  const [exercises, setExercises] = useState<any>([]);
 
   // Reload cards if deletions, edits, additions are made
+  // Also clears the add/edit forms
   useEffect(() => {
     async function getCardData() {
       const cardData: Object[] = [];
@@ -165,13 +278,7 @@ export default function Home() {
               title: `#${obj.w_id}: ${obj.w_name}`,
               description: `Difficulty: ${obj.difficulty}`,
               time: `Total time: ${obj.duration} min`,
-              exercises: [
-                { name: "Bench Press", sets: "4x8", rest: "2 min" },
-                { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-                { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-                { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-                { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-              ],
+              exercises: [],
             });
           }
         });
@@ -180,12 +287,37 @@ export default function Home() {
     if (session?.user?.name) {
       getCardData();
     }
+    // Clear form data
+    addWorkoutForm.reset();
+    editWorkoutForm.reset();
+    addExerciseForm.reset();
   }, [cardChange, session?.user?.name]);
+
+  // Fetch exercises from backend
+  useEffect(() => {
+    async function getExercises() {
+      const exercises: Object[] = [];
+      await fetch("api/exercises")
+        .then((response) => response.json())
+        .then((message) => {
+          for (const obj of message.data) {
+            exercises.push({
+              value: obj.ex_id,
+              label: obj.exercise_name,
+            });
+          }
+        });
+      setExercises(exercises);
+    }
+    getExercises();
+    // This boolean stops an infinite refresh loop. I don't know why
+  }, [false]);
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex justify-between px-100">
         <WelcomeHeader />
+        {/* Add workout dialogue */}
         <Dialog>
           <DialogTrigger asChild>
             <Button className="bg-accent" size="lg">
@@ -203,13 +335,13 @@ export default function Home() {
                 you&apos;re done, or X to cancel.
               </DialogDescription>
             </DialogHeader>
-            <Form {...form}>
+            <Form {...addWorkoutForm}>
               <form
-                onSubmit={form.handleSubmit(onSubmitAddWorkout)}
+                onSubmit={addWorkoutForm.handleSubmit(onSubmitAddWorkout)}
                 className="space-y-8"
               >
                 <FormField
-                  control={form.control}
+                  control={addWorkoutForm.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
@@ -222,7 +354,7 @@ export default function Home() {
                   )}
                 />
                 <FormField
-                  control={form.control}
+                  control={addWorkoutForm.control}
                   name="duration"
                   render={({ field }) => (
                     <FormItem>
@@ -235,7 +367,7 @@ export default function Home() {
                   )}
                 />
                 <FormField
-                  control={form.control}
+                  control={addWorkoutForm.control}
                   name="difficulty"
                   render={({ field }) => (
                     <FormItem>
@@ -260,7 +392,7 @@ export default function Home() {
                   )}
                 />
                 <FormField
-                  control={form.control}
+                  control={addWorkoutForm.control}
                   name="tags"
                   render={({ field }) => (
                     <FormItem>
@@ -278,13 +410,26 @@ export default function Home() {
                 />
                 <DialogFooter>
                   <DialogClose asChild>
-                    <Button type="submit" className="bg-secondary">
-                      Add workout
-                      <i
-                        className="fa-solid"
-                        style={{ color: "hsl(var(--primary))" }}
-                      />
-                    </Button>
+                    {/* Uses a ternary operator to render 1 of 2 buttons depending on whether isValid is true or not. 
+                      If isValid is false, disable the button. 
+                      If it's true, enable the button */}
+                    {!addIsValid ? (
+                      <Button disabled type="submit" className="bg-secondary">
+                        Add workout
+                        <i
+                          className="fa-solid"
+                          style={{ color: "hsl(var(--primary))" }}
+                        />
+                      </Button>
+                    ) : (
+                      <Button type="submit" className="bg-secondary">
+                        Add workout
+                        <i
+                          className="fa-solid"
+                          style={{ color: "hsl(var(--primary))" }}
+                        />
+                      </Button>
+                    )}
                   </DialogClose>
                 </DialogFooter>
               </form>
@@ -292,6 +437,7 @@ export default function Home() {
           </DialogContent>
         </Dialog>
       </div>
+      {/* Start of workout cards grid */}
       <div className="grid grid-cols-3 gap-4 px-20">
         {cardData.map((card: any, index: any) => (
           <Card key={index}>
@@ -299,6 +445,7 @@ export default function Home() {
               <div className="flex justify-between items-center">
                 <CardTitle>{card.title}</CardTitle>
                 <div className="flex gap-2">
+                  {/* Edit workout dialogue */}
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button className="bg-accent" size="icon">
@@ -316,14 +463,16 @@ export default function Home() {
                           changes&quot; when you&apos;re done, or X to cancel.
                         </DialogDescription>
                       </DialogHeader>
-                      <Form {...form}>
+                      <Form {...editWorkoutForm}>
                         <form
                           // cardTitle.split(':')[0].substring(1)
-                          onSubmit={form.handleSubmit(onSubmitEditWorkout)}
+                          onSubmit={editWorkoutForm.handleSubmit(
+                            onSubmitEditWorkout,
+                          )}
                           className="space-y-8"
                         >
                           <FormField
-                            control={form.control}
+                            control={editWorkoutForm.control}
                             name="name"
                             render={({ field }) => (
                               <FormItem>
@@ -339,7 +488,7 @@ export default function Home() {
                             )}
                           />
                           <FormField
-                            control={form.control}
+                            control={editWorkoutForm.control}
                             name="duration"
                             render={({ field }) => (
                               <FormItem>
@@ -355,7 +504,7 @@ export default function Home() {
                             )}
                           />
                           <FormField
-                            control={form.control}
+                            control={editWorkoutForm.control}
                             name="difficulty"
                             render={({ field }) => (
                               <FormItem>
@@ -382,7 +531,7 @@ export default function Home() {
                             )}
                           />
                           <FormField
-                            control={form.control}
+                            control={editWorkoutForm.control}
                             name="tags"
                             render={({ field }) => (
                               <FormItem>
@@ -396,19 +545,37 @@ export default function Home() {
                           />
                           <DialogFooter>
                             <DialogClose asChild>
-                              <Button type="submit" className="bg-secondary">
-                                Submit changes
-                                <i
-                                  className="fa-solid"
-                                  style={{ color: "hsl(var(--primary))" }}
-                                />
-                              </Button>
+                              {/* Uses a ternary operator to render 1 of 2 buttons depending on whether isValid is true or not. 
+                                If isValid is false, disable the button. 
+                                If it's true, enable the button */}
+                              {!editIsValid ? (
+                                <Button
+                                  disabled
+                                  type="submit"
+                                  className="bg-secondary"
+                                >
+                                  Submit changes
+                                  <i
+                                    className="fa-solid"
+                                    style={{ color: "hsl(var(--primary))" }}
+                                  />
+                                </Button>
+                              ) : (
+                                <Button type="submit" className="bg-secondary">
+                                  Submit changes
+                                  <i
+                                    className="fa-solid"
+                                    style={{ color: "hsl(var(--primary))" }}
+                                  />
+                                </Button>
+                              )}
                             </DialogClose>
                           </DialogFooter>
                         </form>
                       </Form>
                     </DialogContent>
                   </Dialog>
+                  {/* Delete workout dialogue */}
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button className="bg-accent" size="icon">
@@ -445,6 +612,7 @@ export default function Home() {
                   </Dialog>
                 </div>
               </div>
+              {/* Template for each individual card */}
               <CardDescription>{card.description}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
@@ -460,6 +628,159 @@ export default function Home() {
                       <p>{exercise.rest} rest</p>
                     </div>
                   ))}
+                  {/* Add exercise dialogue */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="bg-accent" size="icon">
+                        <i
+                          className="fa-solid fa-plus"
+                          style={{ color: "hsl(var(--primary))" }}
+                        />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Add exercise to workout</DialogTitle>
+                        <DialogDescription>
+                          Add an exercise to your workout here. Click &quot;add
+                          exercise&quot; when you&apos;re done, or X to cancel.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <Form {...addExerciseForm}>
+                        <form
+                          onSubmit={addExerciseForm.handleSubmit(
+                            onSubmitAddExercise,
+                          )}
+                          className="space-y-8"
+                        >
+                          <FormField
+                            control={addExerciseForm.control}
+                            name="exercise"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Exercise</FormLabel>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <FormControl>
+                                      <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        className={cn(
+                                          "w-[375px] justify-between",
+                                          !field.value &&
+                                            "text-muted-foreground",
+                                        )}
+                                      >
+                                        {field.value
+                                          ? exercises.find(
+                                              (exercise: any) =>
+                                                exercise.value === field.value,
+                                            )?.label
+                                          : "Select exercise"}
+                                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                      </Button>
+                                    </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-[375px] p-0">
+                                    <Command>
+                                      <CommandInput
+                                        placeholder="Search exercises..."
+                                        className="h-9"
+                                      />
+                                      <ScrollArea className="h-48 overflow-auto">
+                                        <CommandEmpty>
+                                          No exercise found.
+                                        </CommandEmpty>
+                                        <CommandGroup>
+                                          {exercises.map((exercise: any) => (
+                                            <CommandItem
+                                              value={exercise.label}
+                                              key={exercise.value}
+                                              onSelect={() => {
+                                                addExerciseForm.setValue(
+                                                  "exercise",
+                                                  exercise.value,
+                                                );
+                                              }}
+                                            >
+                                              {exercise.label}
+                                              <CheckIcon
+                                                className={cn(
+                                                  "ml-auto h-4 w-4",
+                                                  exercise.value === field.value
+                                                    ? "opacity-100"
+                                                    : "opacity-0",
+                                                )}
+                                              />
+                                            </CommandItem>
+                                          ))}
+                                        </CommandGroup>
+                                      </ScrollArea>
+                                    </Command>
+                                  </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={addExerciseForm.control}
+                            name="sets"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Sets</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="5" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={addExerciseForm.control}
+                            name="reps"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Reps</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="10" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <DialogFooter>
+                            <DialogClose asChild>
+                              {/* Uses a ternary operator to render 1 of 2 buttons depending on whether isValid is true or not. 
+                                If isValid is false, disable the button. 
+                                If it's true, enable the button */}
+                              {!exerciseIsValid ? (
+                                <Button
+                                  disabled
+                                  type="submit"
+                                  className="bg-secondary"
+                                >
+                                  Add exercise
+                                  <i
+                                    className="fa-solid"
+                                    style={{ color: "hsl(var(--primary))" }}
+                                  />
+                                </Button>
+                              ) : (
+                                <Button type="submit" className="bg-secondary">
+                                  Add exercise
+                                  <i
+                                    className="fa-solid"
+                                    style={{ color: "hsl(var(--primary))" }}
+                                  />
+                                </Button>
+                              )}
+                            </DialogClose>
+                          </DialogFooter>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </CardContent>
