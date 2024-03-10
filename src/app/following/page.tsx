@@ -13,46 +13,76 @@ export default function Following() {
   const { data: session } = useSession();
   const username = session?.user?.name;
 
-  const getFollowingData = useCallback(async () => {
-    try {
-      const newFollowing = [];
-      const response = await fetch(
-        `/api/following?username=${encodeURIComponent(username || "")}`,
-      );
-      if (!username) {
-        redirect("/register");
-      }
-      if (!response.ok) {
-        throw new Error("Failed to fetch following data");
-      }
-      const responseData = await response.json();
-      console.log("Response Data:", responseData);
+  // const getFollowingData = useCallback(async () => {
+  //   try {
+  //     const newFollowing = [];
+  //     const response = await fetch(
+  //       `/api/following?username=${encodeURIComponent(username || "")}`,
+  //     );
+  //     if (!username) {
+  //       redirect("/register");
+  //     }
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch following data");
+  //     }
+  //     const responseData = await response.json();
+  //     console.log("Response Data:", responseData);
 
-      if (responseData.data && Array.isArray(responseData.data)) {
-        for (const obj of responseData.data) {
-          console.log("obj: ", obj);
-          newFollowing.push({
-            img: "hgsdfaj",
-            username: obj.following,
-          });
-        }
-      }
+  //     if (responseData.data && Array.isArray(responseData.data)) {
+  //       for (const obj of responseData.data) {
+  //         console.log("obj: ", obj);
+  //         newFollowing.push({
+  //           img: "hgsdfaj",
+  //           username: obj.following,
+  //         });
+  //       }
+  //     }
 
-      setFollowingData(newFollowing);
-    } catch (error) {
-      console.error("Error fetching following data:", error);
-    }
-  }, [username]);
+  //     setFollowingData(newFollowing);
+  //   } catch (error) {
+  //     console.error("Error fetching following data:", error);
+  //   }
+  // }, [username]);
 
   const [followingData, setFollowingData] = useState<
     { img: string; username: string }[]
   >([]);
 
   useEffect(() => {
+    async function getFollowingData() {
+      try {
+        const newFollowing = [];
+        const response = await fetch(
+          `/api/following?username=${encodeURIComponent(username || "")}`,
+        );
+        if (!username) {
+          redirect("/register");
+        }
+        if (!response.ok) {
+          throw new Error("Failed to fetch following data");
+        }
+        const responseData = await response.json();
+        console.log("Response Data:", responseData);
+
+        if (responseData.data && Array.isArray(responseData.data)) {
+          for (const obj of responseData.data) {
+            console.log("obj: ", obj);
+            newFollowing.push({
+              img: "hgsdfaj",
+              username: obj.following,
+            });
+          }
+        }
+
+        setFollowingData(newFollowing);
+      } catch (error) {
+        console.error("Error fetching following data:", error);
+      }
+    }
     if (session) {
       getFollowingData();
     }
-  }, [session, getFollowingData]);
+  }, [followingData, session, username]);
   return (
     <div className="flex flex-col gap-5">
       <div
