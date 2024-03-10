@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
+    console.log("trying to connect to the database");
     const db = connectDB();
     const url = new URL(req.url ? req.url : "invalid");
     const username = url.searchParams.get("username");
