@@ -10,7 +10,7 @@ import Unauthorized from "@/components/unauthorized";
 type Props = { username: string; session: Session };
 
 function Following({ username, session }: Props) {
-  const getfollowingData = useCallback(async () => {
+  const getFollowingData = useCallback(async () => {
     try {
       const newFollowing = [];
       const response = await fetch(
@@ -35,21 +35,21 @@ function Following({ username, session }: Props) {
         }
       }
 
-      setfollowingData(newFollowing);
+      setFollowingData(newFollowing);
     } catch (error) {
       console.error("Error fetching followering data:", error);
     }
   }, [username]);
 
-  const [followingData, setfollowingData] = useState<
+  const [followingData, setFollowingData] = useState<
     { img: string; username: string }[]
   >([]);
 
   useEffect(() => {
     if (session) {
-      getfollowingData();
+      getFollowingData();
     }
-  }, [session, getfollowingData]);
+  }, [session, getFollowingData]);
   return (
     <div className="flex flex-col gap-5">
       <div

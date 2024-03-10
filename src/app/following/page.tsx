@@ -1,15 +1,9 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import { SessionProvider } from "next-auth/react";
-import { NextResponse } from "next/server";
-
-export const dynamic = "force-static";
 
 export default function Following() {
   const { data: session } = useSession();
@@ -86,7 +80,7 @@ export default function Following() {
                 <Button type="submit">
                   <i style={{ color: "hsl(var(--primary)" }} />
                   <span style={{ color: "hsl(var(--accent))" }}>
-                    {following.username ? following.username : "N/A"}
+                    {following.username}
                   </span>
                 </Button>
               </div>
