@@ -14,27 +14,12 @@ import Link from "next/link";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
-
-  const [isEditingUsername, setIsEditingUsername] = useState(false);
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
-  const [username, setUsername] = useState("user1");
-  const [email, setEmail] = useState("user1@test.com");
+  const username = session?.user?.name;
+  const email = session?.user?.email;
 
   const handleLogout = async () => {
     console.log("Logging out");
     await signOut();
-  };
-
-  const handleUsernameChange = () => {
-    setIsEditingUsername(false);
-    console.log(username);
-    // change username in db
-  };
-
-  const handleEmailChange = () => {
-    setIsEditingEmail(false);
-    console.log(email);
-    // change email in db
   };
 
   return (
@@ -45,58 +30,14 @@ export default function ProfilePage() {
             <Avatar className="h-24 w-24">
               <AvatarImage src="https://source.unsplash.com/random/200x200/?fitness" />
               <AvatarFallback>
-                {username.charAt(0).toUpperCase()}
+                {username?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-row items-center gap-2">
-              {isEditingUsername ? (
-                <div className="flex flex-col gap-2 items-center">
-                  <Input
-                    type="text"
-                    value={username}
-                    onChange={(event) => setUsername(event.target.value)}
-                    onKeyPress={(event) => {
-                      if (event.key === "Enter") {
-                        handleUsernameChange();
-                      }
-                    }}
-                  />
-                  <p>Press enter to save changes</p>
-                </div>
-              ) : (
-                <h1 className="font-bold text-5xl">{username}</h1>
-              )}
-              <Button size="icon" onClick={() => setIsEditingUsername(true)}>
-                <i
-                  className="fa-solid fa-pen-to-square fa-2x"
-                  style={{ color: "hsl(var(--accent))" }}
-                />
-              </Button>
+              <h1 className="font-bold text-5xl">{username}</h1>
             </div>
             <div className="flex flex-row items-center gap-2">
-              {isEditingEmail ? (
-                <div className="flex flex-col gap-2 items-center">
-                  <Input
-                    type="text"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    onKeyPress={(event) => {
-                      if (event.key === "Enter") {
-                        handleEmailChange();
-                      }
-                    }}
-                  />
-                  <p>Press enter to save changes</p>
-                </div>
-              ) : (
-                <h1 className="text-2xl">{email}</h1>
-              )}
-              <Button size="icon" onClick={() => setIsEditingEmail(true)}>
-                <i
-                  className="fa-solid fa-pen-to-square"
-                  style={{ color: "hsl(var(--accent))" }}
-                />
-              </Button>
+              <h1 className="text-2xl">{email}</h1>
             </div>
           </div>
           <Separator className="my-4 sm:w-2/3" />
