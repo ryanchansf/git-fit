@@ -52,26 +52,19 @@ import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import connectDB from "@/database/db";
-import { NextResponse } from "next/server";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import React, { useEffect, useState } from "react";
 import WelcomeHeader from "@/components/welcomeHeader";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 
 // TODO:
 //   - Link exercises to cards
-//   - Make edit button work
-//       - Import existing settings as default values
+//   - Deleting a workout deletes its exercises
 
 const addWorkoutFormSchema = z.object({
   name: z
     .string()
-    .min(2, { message: "Workout name must be at least 2 characters." })
+    .min(2, { message: "Workout name must be at least 1 character." })
     .max(20, { message: "Workout name must be less than 20 characters." }),
   duration: z
     .string()
@@ -86,20 +79,25 @@ const addWorkoutFormSchema = z.object({
 });
 
 const editWorkoutFormSchema = z.object({
-  name: z
-    .string()
-    .min(2, { message: "Workout name must be at least 2 characters." })
-    .max(20, { message: "Workout name must be less than 20 characters." }),
-  duration: z
-    .string()
-    .min(1, { message: "Duration must be an integer greater than 0" })
-    .max(3, { message: "Duration must be an integer less than 1000" })
-    // Regex to detect if the input is an integer
-    .refine((str) => /^\d+$/.test(str), {
-      message: "Duration must be an integer",
-    }),
-  difficulty: z.enum(["Easy", "Medium", "Hard"]),
-  tags: z.string().max(100, { message: "No more than 100 characters allowed" }),
+  // Fields are optional--onSubmit will submit empty fields with original values
+  name: z.optional(
+    z
+      .string()
+      .max(20, { message: "Workout name must be less than 20 characters." }),
+  ),
+  duration: z.optional(
+    z
+      .string()
+      .max(3, { message: "Duration must be an integer less than 1000" })
+      // Regex to detect if the input is an integer
+      .refine((str) => /^\d+$/.test(str), {
+        message: "Duration must be an integer",
+      }),
+  ),
+  difficulty: z.optional(z.enum(["Easy", "Medium", "Hard"])),
+  tags: z.optional(
+    z.string().max(100, { message: "No more than 100 characters allowed" }),
+  ),
 });
 
 const addExerciseFormSchema = z.object({
@@ -125,10 +123,10 @@ const addExerciseFormSchema = z.object({
 export default function Home() {
   const { data: session } = useSession();
   const username = session?.user?.name;
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
 
-  // These specify default values that appear in the forms
+  // Specifies default values that appear in the forms
+  // Note: editWorkoutForm's default values are specified within the form
+  //       and are the original fields from the workout being edited
   const addWorkoutForm = useForm<z.infer<typeof addWorkoutFormSchema>>({
     resolver: zodResolver(addWorkoutFormSchema),
     defaultValues: {
@@ -143,12 +141,7 @@ export default function Home() {
 
   const editWorkoutForm = useForm<z.infer<typeof editWorkoutFormSchema>>({
     resolver: zodResolver(editWorkoutFormSchema),
-    defaultValues: {
-      name: "",
-      duration: "",
-      difficulty: "Medium",
-      tags: "",
-    },
+    defaultValues: {},
     // Show errors immediately
     mode: "onChange",
   });
@@ -168,7 +161,7 @@ export default function Home() {
     formState: { isValid: addIsValid },
   } = addWorkoutForm;
   const {
-    formState: { isValid: editIsValid },
+    formState: { isValid: editIsValid, isDirty },
   } = editWorkoutForm;
   const {
     formState: { isValid: exerciseIsValid },
@@ -200,16 +193,30 @@ export default function Home() {
 
   async function onSubmitEditWorkout(
     values: z.infer<typeof editWorkoutFormSchema>,
+    existing: any,
     w_id: any,
   ) {
+    // Checks if the field was updated or not, then applies changes
+    // If the value is undefined in the updated form, use the old one
     const message = {
       w_id: w_id,
       username: username,
-      duration: values.duration,
-      difficulty: values.difficulty,
-      // Extract individual tags by removing spaces and splitting along commas
-      tags: values.tags.replaceAll(" ", "").split(","),
-      w_name: values.name,
+      duration:
+        typeof values.duration !== "undefined"
+          ? values.duration
+          : existing.time.split(" ")[2],
+      difficulty:
+        typeof values.difficulty !== "undefined"
+          ? values.difficulty
+          : existing.description.split(" ")[1],
+      tags:
+        typeof values.tags !== "undefined"
+          ? values.tags.replaceAll(" ", "").split(",")
+          : existing.tags,
+      w_name:
+        typeof values.name !== "undefined"
+          ? values.name
+          : existing.title.split(": ")[1],
     };
     const promise = await fetch("/api/workouts", {
       method: "PUT",
@@ -220,6 +227,7 @@ export default function Home() {
     });
     // Trigger card reload
     setCardChange(cardChange + 1);
+    editWorkoutForm.reset();
     return promise;
   }
 
@@ -235,7 +243,7 @@ export default function Home() {
       reps: values.reps,
     };
     const promise = await fetch("/api/exercises", {
-      method: "PUT",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
@@ -282,6 +290,7 @@ export default function Home() {
                 description: `Difficulty: ${obj.difficulty}`,
                 time: `Total time: ${obj.duration} min`,
                 exercises: [],
+                tags: obj.tags,
               });
             }
           }
@@ -469,9 +478,11 @@ export default function Home() {
                       </DialogHeader>
                       <Form {...editWorkoutForm}>
                         <form
+                          // Submits with any changed values, as well as the original values
                           onSubmit={editWorkoutForm.handleSubmit((formData) =>
                             onSubmitEditWorkout(
                               formData,
+                              card,
                               card.title.split(":")[0].substring(1),
                             ),
                           )}
@@ -485,8 +496,10 @@ export default function Home() {
                                 <FormLabel>Workout name</FormLabel>
                                 <FormControl>
                                   <Input
+                                    // Extract card title
                                     placeholder={card.title.split(": ")[1]}
                                     {...field}
+                                    defaultValue={card.title.split(": ")[1]}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -501,8 +514,10 @@ export default function Home() {
                                 <FormLabel>Duration (min)</FormLabel>
                                 <FormControl>
                                   <Input
-                                    placeholder={card.duration}
+                                    // Extract duration
+                                    placeholder={card.time.split(" ")[2]}
                                     {...field}
+                                    defaultValue={card.time.split(" ")[2]}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -517,7 +532,8 @@ export default function Home() {
                                 <FormLabel>Difficulty</FormLabel>
                                 <Select
                                   onValueChange={field.onChange}
-                                  defaultValue={field.value}
+                                  // Extract original difficulty
+                                  defaultValue={card.description.split(" ")[1]}
                                 >
                                   <FormControl>
                                     <SelectTrigger>
@@ -543,7 +559,12 @@ export default function Home() {
                               <FormItem>
                                 <FormLabel>Tags</FormLabel>
                                 <FormControl>
-                                  <Input placeholder={card.tags} {...field} />
+                                  <Input
+                                    placeholder={card.tags}
+                                    // Extract original tags
+                                    {...field}
+                                    defaultValue={card.tags}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
