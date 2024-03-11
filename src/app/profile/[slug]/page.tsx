@@ -23,6 +23,9 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
   const { data: session } = useSession();
 
   const [workouts, setWorkouts] = useState<Object[]>([]);
+  const [workoutsCount, setWorkoutsCount] = useState<number>(0);
+  const [followersCount, setFollowersCount] = useState<number>(0);
+  const [followingCount, setFollowingCount] = useState<number>(0);
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -53,10 +56,23 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
           });
         setWorkouts(cardData);
       } catch (error) {
-        console.error("Error fetching workouts:", error);
+        console.error("Error fetching data:", error);
       }
     };
-
+    async function fetchProfileData() {
+      try {
+        const response = await fetch(`/api/profile?username=${params.slug}`)
+          .then((response) => response.json())
+          .then((message) => message.data);
+        const { workouts, followers, following } = response;
+        setWorkoutsCount(workouts);
+        setFollowersCount(followers);
+        setFollowingCount(following);
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      }
+    }
+    fetchProfileData();
     fetchWorkouts();
   }, [params.slug]);
 
@@ -83,18 +99,18 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
 
             <div className="flex sm:w-1/2 justify-between">
               <div className="flex flex-col items-center">
-                <h1 className="font-bold text-4xl">4</h1>
+                <h1 className="font-bold text-4xl">{workoutsCount}</h1>
                 <p className="text-lg">Workouts</p>
               </div>
               <Link href="/friends">
                 <div className="flex flex-col items-center">
-                  <h1 className="font-bold text-4xl">2</h1>
+                  <h1 className="font-bold text-4xl">{followersCount}</h1>
                   <p className="text-lg">Followers</p>
                 </div>
               </Link>
               <Link href="/friends">
                 <div className="flex flex-col items-center">
-                  <h1 className="font-bold text-4xl">2</h1>
+                  <h1 className="font-bold text-4xl">{followingCount}</h1>
                   <p className="text-lg">Following</p>
                 </div>
               </Link>
@@ -110,12 +126,18 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
                 This user doesn&apos;t have any workouts yet!
               </h1>
             ) : (
-              <div className="grid grid-cols-3 gap-4 px-20">
+              <div className="grid grid-cols-2 gap-4 px-10">
                 {workouts.map((card: any, index: any) => (
                   <Card key={index}>
                     <CardHeader>
                       <div className="flex justify-between items-center">
                         <CardTitle>{card.title}</CardTitle>
+                        <Button className="bg-accent" size="icon">
+                          <i
+                            className="fa-solid fa-plus"
+                            style={{ color: "hsl(var(--primary))" }}
+                          />
+                        </Button>
                       </div>
                       <CardDescription>{card.description}</CardDescription>
                     </CardHeader>

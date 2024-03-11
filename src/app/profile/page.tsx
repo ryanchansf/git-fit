@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,9 +22,30 @@ export default function ProfilePage() {
     await signOut();
   };
 
+  const [workoutsCount, setWorkoutsCount] = useState<number>(0);
+  const [followersCount, setFollowersCount] = useState<number>(0);
+  const [followingCount, setFollowingCount] = useState<number>(0);
+
+  useEffect(() => {
+    async function fetchProfileData() {
+      try {
+        const response = await fetch(`/api/profile?username=${username}`)
+          .then((response) => response.json())
+          .then((message) => message.data);
+        const { workouts, followers, following } = response;
+        setWorkoutsCount(workouts);
+        setFollowersCount(followers);
+        setFollowingCount(following);
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      }
+    }
+    fetchProfileData();
+  }, [username]);
+
   return (
     <div>
-      {session?.user?.email ? (
+      {session ? (
         <Card className="flex flex-col border-none items-center justify-center gap-3 py-5 px-10">
           <div className="flex flex-col items-center justify-center gap-3">
             <Avatar className="h-24 w-24">
@@ -44,18 +65,18 @@ export default function ProfilePage() {
 
           <div className="flex sm:w-1/2 justify-between">
             <div className="flex flex-col items-center">
-              <h1 className="font-bold text-4xl">4</h1>
+              <h1 className="font-bold text-4xl">{workoutsCount}</h1>
               <p className="text-lg">Workouts</p>
             </div>
             <Link href="/friends">
               <div className="flex flex-col items-center">
-                <h1 className="font-bold text-4xl">2</h1>
+                <h1 className="font-bold text-4xl">{followersCount}</h1>
                 <p className="text-lg">Followers</p>
               </div>
             </Link>
             <Link href="/friends">
               <div className="flex flex-col items-center">
-                <h1 className="font-bold text-4xl">2</h1>
+                <h1 className="font-bold text-4xl">{followingCount}</h1>
                 <p className="text-lg">Following</p>
               </div>
             </Link>
