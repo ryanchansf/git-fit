@@ -158,21 +158,23 @@ export default function Home() {
         .then((response) => response.json())
         .then((message) => {
           // Order by workout ID, newest first
-          for (const obj of message.data.sort(
-            (a: any, b: any) => b.w_id - a.w_id,
-          )) {
-            cardData.push({
-              title: `#${obj.w_id}: ${obj.w_name}`,
-              description: `Difficulty: ${obj.difficulty}`,
-              time: `Total time: ${obj.duration} min`,
-              exercises: [
-                { name: "Bench Press", sets: "4x8", rest: "2 min" },
-                { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-                { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-                { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-                { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-              ],
-            });
+          if (message.data) {
+            for (const obj of message.data.sort(
+              (a: any, b: any) => b.w_id - a.w_id,
+            )) {
+              cardData.push({
+                title: `#${obj.w_id}: ${obj.w_name}`,
+                description: `Difficulty: ${obj.difficulty}`,
+                time: `Total time: ${obj.duration} min`,
+                exercises: [
+                  { name: "Bench Press", sets: "4x8", rest: "2 min" },
+                  { name: "Overhead Press", sets: "4x8", rest: "2 min" },
+                  { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
+                  { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
+                  { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
+                ],
+              });
+            }
           }
         });
       setCardData(cardData);
