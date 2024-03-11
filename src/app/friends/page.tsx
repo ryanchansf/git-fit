@@ -20,10 +20,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Props = { username: string; session: Session };
 
-function Following() {
-  const { data: session } = useSession();
-  const username = session?.user?.name;
-
+function Following({ username, session }: Props) {
   const getfollowingData = useCallback(async () => {
     try {
       const newFollowing = [];
