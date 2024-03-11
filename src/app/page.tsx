@@ -201,9 +201,10 @@ export default function Home() {
 
   async function onSubmitEditWorkout(
     values: z.infer<typeof editWorkoutFormSchema>,
+    w_id: any,
   ) {
     const message = {
-      //w_id: ,
+      w_id: w_id,
       username: username,
       duration: values.duration,
       difficulty: values.difficulty,
@@ -225,9 +226,10 @@ export default function Home() {
 
   async function onSubmitAddExercise(
     values: z.infer<typeof addExerciseFormSchema>,
+    w_id: any,
   ) {
     const message = {
-      //w_id: ,
+      w_id: w_id,
       username: username,
       exercise_id: values.exercise,
       sets: values.sets,
@@ -270,16 +272,19 @@ export default function Home() {
       await fetch(`/api/workouts?username=${session?.user?.name}`)
         .then((response) => response.json())
         .then((message) => {
-          // Order by workout ID, newest first
-          for (const obj of message.data.sort(
-            (a: any, b: any) => b.w_id - a.w_id,
-          )) {
-            cardData.push({
-              title: `#${obj.w_id}: ${obj.w_name}`,
-              description: `Difficulty: ${obj.difficulty}`,
-              time: `Total time: ${obj.duration} min`,
-              exercises: [],
-            });
+          // Necessary so empty message data doesn't throw an error
+          if (message.status !== 404) {
+            // Order by workout ID, newest first
+            for (const obj of message.data.sort(
+              (a: any, b: any) => b.w_id - a.w_id,
+            )) {
+              cardData.push({
+                title: `#${obj.w_id}: ${obj.w_name}`,
+                description: `Difficulty: ${obj.difficulty}`,
+                time: `Total time: ${obj.duration} min`,
+                exercises: [],
+              });
+            }
           }
         });
       setCardData(cardData);
@@ -465,9 +470,11 @@ export default function Home() {
                       </DialogHeader>
                       <Form {...editWorkoutForm}>
                         <form
-                          // cardTitle.split(':')[0].substring(1)
-                          onSubmit={editWorkoutForm.handleSubmit(
-                            onSubmitEditWorkout,
+                          onSubmit={editWorkoutForm.handleSubmit((formData) =>
+                            onSubmitEditWorkout(
+                              formData,
+                              card.title.split(":")[0].substring(1),
+                            ),
                           )}
                           className="space-y-8"
                         >
@@ -648,8 +655,11 @@ export default function Home() {
                       </DialogHeader>
                       <Form {...addExerciseForm}>
                         <form
-                          onSubmit={addExerciseForm.handleSubmit(
-                            onSubmitAddExercise,
+                          onSubmit={addExerciseForm.handleSubmit((formData) =>
+                            onSubmitAddExercise(
+                              formData,
+                              card.title.split(":")[0].substring(1),
+                            ),
                           )}
                           className="space-y-8"
                         >
