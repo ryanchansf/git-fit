@@ -67,7 +67,6 @@ import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 //   - Link exercises to cards
 //   - Make edit button work
 //       - Import existing settings as default values
-//   - Attach workout_id to edit workout and add exercise forms
 
 const addWorkoutFormSchema = z.object({
   name: z

@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     // Insert the new user into the Supabase database
     const { error } = await supabase
       .from("users")
-      .insert([{ username, email, password }]);
+      .insert([{ username, email, password }] as any);
 
     if (error) {
       throw error;
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url ? req.url : "invalid");
     const username = url.searchParams.get("username");
 
-    let data, error;
+    let data: any, error: any;
 
     // If a username is provided, get that specific user
     if (username) {
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       throw error;
     }
     console.log("returning data: ", data);
-    // Return the users in the response
+    // Return the user(s) in the response
     return NextResponse.json({
       message: "Users retrieved",
       status: 200,
@@ -78,12 +78,12 @@ export async function PUT(req: Request) {
   try {
     const supabase = connectDB();
 
-    const { username, phoneNumber, email } = await req.json();
+    const { username, email, password } = await req.json();
 
     // Update the user in the database
     const { error } = await supabase
       .from("users")
-      .update({ username, phoneNumber, email })
+      .update({ username, email, password } as never)
       .match({ username });
 
     if (error) {
