@@ -19,6 +19,14 @@ import { useSession } from "next-auth/react";
 import Unauthorized from "@/components/unauthorized";
 import Link from "next/link";
 
+function getApiUrl(path: string) {
+  if (process.env.NODE_ENV === "test") {
+    return `http://localhost:3000${path}`;
+  } else {
+    return path;
+  }
+}
+
 export default function FriendPage({ params }: { params: { slug: string } }) {
   const { data: session } = useSession();
 
@@ -31,7 +39,9 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
     const fetchWorkouts = async () => {
       const cardData: Object[] = [];
       try {
-        const response = await fetch(`/api/workouts?username=${params.slug}`)
+        const response = await fetch(
+          getApiUrl(`/api/workouts?username=${params.slug}`),
+        )
           .then((response) => response.json())
           .then((message) => {
             // Order by workout ID, newest first
@@ -61,7 +71,9 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
     };
     async function fetchProfileData() {
       try {
-        const response = await fetch(`/api/profile?username=${params.slug}`)
+        const response = await fetch(
+          getApiUrl(`/api/profile?username=${params.slug}`),
+        )
           .then((response) => response.json())
           .then((message) => message.data);
         const { workouts, followers, following } = response;
