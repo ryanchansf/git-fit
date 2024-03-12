@@ -12,10 +12,12 @@ import { Label } from "@/components/ui/label";
 import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
 
 export default function Search() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const router = useRouter();
   useEffect(() => {
     async function handleChange(username: string) {
       try {
@@ -98,7 +100,12 @@ export default function Search() {
                       </Avatar>
                     </div>
                     <div style={{ marginLeft: "25px" }}>
-                      <Button type="submit">
+                      <Button
+                        type="submit"
+                        onClick={() =>
+                          router.push(`/profile/${result.username}`)
+                        }
+                      >
                         <i style={{ color: "hsl(var(--primary))" }} />
                         <span style={{ color: "hsl(var(--accent))" }}>
                           {result.username}

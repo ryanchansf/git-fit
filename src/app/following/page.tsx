@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Following() {
   const { data: session } = useSession();
   const username = session?.user?.name;
+  const router = useRouter();
 
   const getfollowingData = useCallback(async () => {
     try {
@@ -97,7 +99,10 @@ export default function Following() {
                 </Avatar>
               </div>
               <div style={{ marginLeft: "25px" }}>
-                <Button type="submit">
+                <Button
+                  type="submit"
+                  onClick={() => router.push(`/profile/${following.username}`)}
+                >
                   <i style={{ color: "hsl(var(--primary)" }} />
                   <span style={{ color: "hsl(var(--accent))" }}>
                     {following.username}

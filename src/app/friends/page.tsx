@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { useSession } from "next-auth/react";
 import Unauthorized from "@/components/unauthorized";
 import Following from "../following/page";
