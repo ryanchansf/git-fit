@@ -1,39 +1,38 @@
 import connectDB from "@/database/db";
-import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: Request) {
-  const { username } = await req.json();
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url ? req.url : "invalid");
+  const username = url.searchParams.get("username");
+
   try {
-    console.log("here bruh");
-    const db = connectDB();
-    if (!db) {
-      throw new Error("Failed to connect to the database");
-    }
-    console.log("fed up");
-    console.log(username);
-    console.log("overthissss");
+    const supabase = connectDB();
+    let data, error;
 
-    if (!username) {
-      throw new Error("Missing username");
+    // If a username is provided, get that specific user
+    if (username) {
+      ({ data, error } = await supabase
+        .from("users")
+        .select("username")
+        .ilike("username", `%${username}%`));
+    } else {
+      // If no username is provided, get all users
+      ({ data, error } = await supabase.from("users").select("*"));
     }
-    const { data: results, error } = await db
-      .from("users")
-      .select("*")
-      .match({ username: username });
 
     if (error) {
       throw error;
     }
+    // Return the users in the response
     return NextResponse.json({
-      message: "User displayed",
+      message: "Users retrieved",
       status: 200,
-      results,
+      data,
     });
   } catch (error) {
     console.error(error);
     return NextResponse.json({
-      message: `Failed to find user: ${error}`,
+      message: `Failed to retrieve users: ${error}`,
       status: 500,
     });
   }

@@ -22,11 +22,9 @@ export default function Followers() {
         throw new Error("Failed to fetch follower data");
       }
       const responseData = await response.json();
-      console.log("Response Data:", responseData);
 
       if (responseData.data && Array.isArray(responseData.data)) {
         for (const obj of responseData.data) {
-          console.log("obj: ", obj);
           newFollower.push({
             img: "hgsdfaj",
             username: obj.follower,
