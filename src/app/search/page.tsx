@@ -14,23 +14,10 @@ import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
 export default function Search() {
   const [searchQuery, setSearchQuery] = useState(""); // State to hold the search query
   const [searchResults, setSearchResults] = useState<any[]>([]); // State to hold the search results
-  const [open, setOpen] = React.useState(false);
+  //   const [open, setOpen] = React.useState(false);
   useEffect(() => {
     async function handleChange(username: string) {
       try {

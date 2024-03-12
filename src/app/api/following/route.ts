@@ -3,10 +3,12 @@ import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/Supaba
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
+  const url = new URL(req.url ? req.url : "invalid");
+  const username = url.searchParams.get("username");
   try {
     const db = connectDB();
-    const url = new URL(req.url ? req.url : "invalid");
-    const username = url.searchParams.get("username");
+    // const url = new URL(req.url ? req.url : "invalid");
+    // const username = url.searchParams.get("username");
 
     let data, error;
     if (!db) {
@@ -46,10 +48,10 @@ export async function GET(req: NextRequest) {
   }
 }
 export async function POST(req: NextRequest) {
+  const url = new URL(req.url ? req.url : "invalid");
+  const follower = url.searchParams.get("username");
   try {
     const db = connectDB();
-    const url = new URL(req.url ? req.url : "invalid");
-    const follower = url.searchParams.get("username");
     // console.log("backend post:", follower);
 
     if (!db) {
@@ -122,10 +124,10 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: Request) {
+  const url = new URL(req.url ? req.url : "invalid");
+  const follower = url.searchParams.get("username");
   try {
     const db = connectDB();
-    const url = new URL(req.url ? req.url : "invalid");
-    const follower = url.searchParams.get("username");
     // console.log("backend post:", follower);
 
     if (!db) {

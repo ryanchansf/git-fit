@@ -3,12 +3,11 @@ import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/Supaba
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  try {
-    console.log("hereeeee");
-    const supabase = connectDB();
-    const url = new URL(req.url ? req.url : "invalid");
-    const username = url.searchParams.get("username");
+  const url = new URL(req.url ? req.url : "invalid");
+  const username = url.searchParams.get("username");
 
+  try {
+    const supabase = connectDB();
     let data, error;
 
     // If a username is provided, get that specific user

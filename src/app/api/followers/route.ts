@@ -4,10 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 // make is so get request takes in username and only returns followers where the data matches req
 export async function GET(req: NextRequest) {
+  const url = new URL(req.url ? req.url : "invalid");
+  const username = url.searchParams.get("username");
   try {
     const db = connectDB();
-    const url = new URL(req.url ? req.url : "invalid");
-    const username = url.searchParams.get("username");
     // console.log("backend:", username);
 
     let data, error;
