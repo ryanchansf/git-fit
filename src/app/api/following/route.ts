@@ -52,21 +52,17 @@ export async function POST(req: NextRequest) {
   const follower = url.searchParams.get("username");
   try {
     const db = connectDB();
-    // console.log("backend post:", follower);
 
     if (!db) {
       throw new Error("Failed to connect to the database");
     }
 
     const { following } = await req.json();
-    // console.log("follower: ", follower);
-    // console.log("following: ", following);
-    // make sure FOLLOWER exist
+
     const { data: check_follower, error: follower_exists_error } = await db
       .from("users")
       .select("*")
       .match({ username: follower });
-    // console.log("check follower: ", check_follower);
 
     if (!check_follower || check_follower.length === 0) {
       throw new Error("follower input invalid: user not found");
@@ -79,7 +75,6 @@ export async function POST(req: NextRequest) {
       .from("users")
       .select("*")
       .match({ username: following });
-    // console.log("check_following", check_following);
 
     if (!check_following || check_following.length === 0) {
       throw new Error("data input invalid: user not found");
@@ -93,7 +88,6 @@ export async function POST(req: NextRequest) {
       .from("following")
       .select("*")
       .match({ follower: follower, following: following });
-    // console.log("check_relationship", check_rel);
 
     if (!check_rel || check_rel.length > 0) {
       throw new Error("relationship already exists");
@@ -115,7 +109,7 @@ export async function POST(req: NextRequest) {
       status: 201,
     });
   } catch (error) {
-    console.error(error); // Log the error to the console
+    console.error(error);
     return NextResponse.json({
       message: `No friend for you`,
       status: 500,
@@ -128,21 +122,17 @@ export async function DELETE(req: Request) {
   const follower = url.searchParams.get("username");
   try {
     const db = connectDB();
-    // console.log("backend post:", follower);
 
     if (!db) {
       throw new Error("Failed to connect to the database");
     }
 
     const { following } = await req.json();
-    // console.log("follower: ", follower);
-    // console.log("following: ", following);
-    // make sure FOLLOWER exist
+
     const { data: check_follower, error: follower_exists_error } = await db
       .from("users")
       .select("*")
       .match({ username: follower });
-    // console.log("check follower: ", check_follower);
 
     if (!check_follower || check_follower.length === 0) {
       throw new Error("follower input invalid: user not found");
@@ -155,7 +145,6 @@ export async function DELETE(req: Request) {
       .from("users")
       .select("*")
       .match({ username: following });
-    // console.log("check_following", check_following);
 
     if (!check_following || check_following.length === 0) {
       throw new Error("data input invalid: user not found");
@@ -176,7 +165,7 @@ export async function DELETE(req: Request) {
       status: 200,
     });
   } catch (error) {
-    console.error(error); // Log the error to the console
+    console.error(error);
     return NextResponse.json({
       message: `Failed to delete remove following`,
       status: 500,

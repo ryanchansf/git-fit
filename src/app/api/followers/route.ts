@@ -2,13 +2,11 @@ import connectDB from "@/database/db";
 import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient";
 import { NextRequest, NextResponse } from "next/server";
 
-// make is so get request takes in username and only returns followers where the data matches req
 export async function GET(req: NextRequest) {
   const url = new URL(req.url ? req.url : "invalid");
   const username = url.searchParams.get("username");
   try {
     const db = connectDB();
-    // console.log("backend:", username);
 
     let data, error;
     if (!db) {
@@ -33,7 +31,6 @@ export async function GET(req: NextRequest) {
     if (error) {
       throw error;
     }
-    console.log("backend.data: ", data);
     // Return the workouts in the response
     return NextResponse.json({
       message: "Followers displayed",

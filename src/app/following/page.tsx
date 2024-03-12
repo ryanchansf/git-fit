@@ -22,11 +22,9 @@ export default function Following() {
         throw new Error("Failed to fetch following data");
       }
       const responseData = await response.json();
-      // console.log("Response Data:", responseData);
 
       if (responseData.data && Array.isArray(responseData.data)) {
         for (const obj of responseData.data) {
-          console.log("obj: ", obj);
           newFollowing.push({
             img: "hgsdfaj",
             username: obj.following,
@@ -52,7 +50,6 @@ export default function Following() {
   }, [session, getfollowingData, followingChange]);
 
   async function handleDeleteClick(remove_user: any) {
-    console.log(username, " no longer wants to follow ", remove_user);
     const message = {
       following: remove_user,
     };

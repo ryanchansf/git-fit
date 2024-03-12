@@ -1,5 +1,4 @@
 import connectDB from "@/database/db";
-import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -24,7 +23,6 @@ export async function GET(req: NextRequest) {
     if (error) {
       throw error;
     }
-    console.log("returning data: ", data);
     // Return the users in the response
     return NextResponse.json({
       message: "Users retrieved",
