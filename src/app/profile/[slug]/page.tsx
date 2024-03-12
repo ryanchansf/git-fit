@@ -10,14 +10,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GetSessionParams, getSession, signOut } from "next-auth/react";
 import { AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import Unauthorized from "@/components/unauthorized";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function FriendPage({ params }: { params: { slug: string } }) {
   const { data: session } = useSession();
@@ -26,6 +33,49 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
   const [workoutsCount, setWorkoutsCount] = useState<number>(0);
   const [followersCount, setFollowersCount] = useState<number>(0);
   const [followingCount, setFollowingCount] = useState<number>(0);
+  const { toast } = useToast();
+
+  const handleAddWorkout = async (workout: any) => {
+    const message = {
+      username: username,
+      duration: workout.duration,
+      difficulty: workout.difficulty,
+      tags: workout.tags,
+      w_name: workout.w_name,
+      w_id: workout.w_id,
+    };
+    fetch("/api/workouts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    })
+      .then((response) => response.json())
+      .then((message) => {
+        if (message.status === 500) {
+          toast({
+            title: "Workout already exists in your list",
+            variant: "destructive",
+            duration: 3000,
+          });
+        } else {
+          toast({
+            title: "Workout added to your list!",
+            variant: "default",
+            duration: 3000,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error adding workout:", error);
+        toast({
+          title: "Failed to add workout",
+          variant: "destructive",
+          duration: 3000,
+        });
+      });
+  };
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -39,18 +89,16 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
               for (const obj of message.data.sort(
                 (a: any, b: any) => b.w_id - a.w_id,
               )) {
-                cardData.push({
-                  title: `#${obj.w_id}: ${obj.w_name}`,
-                  description: `Difficulty: ${obj.difficulty}`,
-                  time: `Total time: ${obj.duration} min`,
-                  exercises: [
-                    { name: "Bench Press", sets: "4x8", rest: "2 min" },
-                    { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-                    { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-                    { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-                    { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-                  ],
-                });
+                const card = { ...obj };
+                // TODO: replace with obj.exercises
+                (card["exercises"] = [
+                  { name: "Bench Press", sets: "4x8", rest: "2 min" },
+                  { name: "Overhead Press", sets: "4x8", rest: "2 min" },
+                  { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
+                  { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
+                  { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
+                ]),
+                  cardData.push(card);
               }
             }
           });
@@ -127,19 +175,47 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
               </h1>
             ) : (
               <div className="grid grid-cols-2 gap-4 px-10">
-                {workouts.map((card: any, index: any) => (
+                {workouts.map((w: any, index: any) => (
                   <Card key={index}>
                     <CardHeader>
                       <div className="flex justify-between items-center">
-                        <CardTitle>{card.title}</CardTitle>
-                        <Button className="bg-accent" size="icon">
-                          <i
-                            className="fa-solid fa-plus"
-                            style={{ color: "hsl(var(--primary))" }}
-                          />
-                        </Button>
+                        <CardTitle>
+                          #{w.w_id}: {w.w_name}
+                        </CardTitle>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button className="bg-accent" size="icon">
+                              <i
+                                className="fa-solid fa-plus"
+                                style={{ color: "hsl(var(--primary))" }}
+                              />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>
+                                #{w.w_id}: {w.w_name}
+                              </DialogTitle>
+                              <br />
+                              <div>
+                                Would you like to add{" "}
+                                <span className="inline-block align-middle whitespace-nowrap max-w-[200px] overflow-auto text-red-500">
+                                  {params.slug}
+                                </span>
+                                &apos;s workout to your list?
+                              </div>
+                              <DialogClose asChild>
+                                <Button onClick={() => handleAddWorkout(w)}>
+                                  Add
+                                </Button>
+                              </DialogClose>
+                            </DialogHeader>
+                          </DialogContent>
+                        </Dialog>
                       </div>
-                      <CardDescription>{card.description}</CardDescription>
+                      <CardDescription>
+                        Difficulty: {w.difficulty}
+                      </CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4">
                       <div className="flex items-center space-x-4 rounded-md border p-4">
@@ -147,7 +223,7 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
                           <p className="text-lg font-medium leading-none">
                             Exercises
                           </p>
-                          {card.exercises.map(
+                          {w.exercises.map(
                             (exercise: any, exerciseIndex: any) => (
                               <div key={exerciseIndex} className="flex gap-3">
                                 <p>
@@ -164,7 +240,7 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
                     <CardFooter>
                       <div className="flex justify-between">
                         <p className="text-sm font-medium leading-none">
-                          {card.time}
+                          {w.time}
                         </p>
                         <p className="text-sm font-medium leading-none"></p>
                       </div>

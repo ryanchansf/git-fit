@@ -67,7 +67,8 @@ export async function POST(req: Request) {
       throw new Error("Failed to connect to the database");
     }
 
-    const { username, duration, difficulty, tags, w_name } = await req.json();
+    const { username, duration, difficulty, tags, w_name, w_id } =
+      await req.json();
 
     if (!username || !duration || !difficulty || !tags || !w_name) {
       throw new Error("Missing required parameters");
@@ -75,9 +76,18 @@ export async function POST(req: Request) {
 
     console.log(username, duration, difficulty, tags, w_name);
 
-    const { data: workout_info, error } = await db
-      .from("workout_info")
-      .insert([{ username, duration, difficulty, tags, w_name }] as any);
+    let workout_info, error;
+    if (w_id) {
+      ({ data: workout_info, error } = await db
+        .from("workout_info")
+        .insert([
+          { w_id, username, duration, difficulty, tags, w_name },
+        ] as any));
+    } else {
+      ({ data: workout_info, error } = await db
+        .from("workout_info")
+        .insert([{ username, duration, difficulty, tags, w_name }] as any));
+    }
 
     if (error) {
       throw error;
@@ -103,6 +113,7 @@ export async function DELETE(req: Request) {
     const db = connectDB();
     const url = new URL(req.url ? req.url : "invalid");
     const w_id = url.searchParams.get("w_id");
+    const username = url.searchParams.get("username");
 
     if (!db) {
       throw new Error("Failed to connect to the database");
@@ -112,19 +123,26 @@ export async function DELETE(req: Request) {
       throw new Error("w_id is missing in the request");
     }
 
+    if (!username) {
+      throw new Error("username is missing in the request");
+    }
+
     const { data: existingWorkouts, error: workout_error } = await db
       .from("workout_info")
       .select("*")
-      .eq("w_id", w_id);
+      .eq("w_id", w_id)
+      .eq("username", username);
 
     if (existingWorkouts && existingWorkouts.length == 0) {
-      throw new Error(`Workout with ID ${w_id} does not exist for user`);
+      throw new Error(
+        `Workout with ID ${w_id} does not exist for user ${username}`,
+      );
     }
 
     const { error: deleteError } = await db
       .from("workout_info")
       .delete()
-      .match({ w_id });
+      .match({ w_id, username });
 
     if (deleteError) {
       throw deleteError;
