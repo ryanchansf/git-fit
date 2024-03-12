@@ -124,6 +124,13 @@ export default function Home() {
   const { data: session } = useSession();
   const username = session?.user?.name;
 
+  // function getExerciseFromId(data: any, exercises: any) {
+  //   // { name: "Lateral Raises", sets: XX, reps: XX },
+  //   for (const item of data) {
+
+  //   }
+  // }
+
   // Specifies default values that appear in the forms
   // Note: editWorkoutForm's default values are specified within the form
   //       and are the original fields from the workout being edited
@@ -279,7 +286,7 @@ export default function Home() {
       await fetch(`/api/workouts?username=${session?.user?.name}`)
         .then((response) => response.json())
         .then((message) => {
-          // Necessary so empty message data doesn't throw an error
+          // If statement is necessary so empty message data doesn't throw an error
           if (message.status !== 404) {
             // Order by workout ID, newest first
             for (const obj of message.data.sort(
@@ -289,7 +296,7 @@ export default function Home() {
                 title: `#${obj.w_id}: ${obj.w_name}`,
                 description: `Difficulty: ${obj.difficulty}`,
                 time: `Total time: ${obj.duration} min`,
-                exercises: [],
+                exercises: [], // ${obj.exercise}
                 tags: obj.tags,
               });
             }
