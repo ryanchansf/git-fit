@@ -136,12 +136,15 @@ export default function Home() {
   async function handleDeleteClick(cardTitle: any) {
     // Extract workout id from card title
     const w_id = cardTitle.split(":")[0].substring(1);
-    const promise = await fetch(`/api/workouts?w_id=${w_id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
+    const promise = await fetch(
+      `/api/workouts?w_id=${w_id}&username=${username}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
     // Trigger card reload
     setCardChange(cardChange + 1);
     return promise;

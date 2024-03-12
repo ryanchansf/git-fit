@@ -2,10 +2,10 @@ import connectDB from "@/database/db";
 import { NextResponse, NextRequest } from "next/server";
 
 export async function GET(req: Request) {
+  const url = new URL(req.url ? req.url : "invalid");
+  const username = url.searchParams.get("username");
   try {
     const db = connectDB();
-    const url = new URL(req.url ? req.url : "invalid");
-    const username = url.searchParams.get("username");
 
     if (!username) {
       return NextResponse.json({

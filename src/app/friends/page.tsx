@@ -6,10 +6,12 @@ import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
 import { Session } from "next-auth";
 import Unauthorized from "@/components/unauthorized";
+import { useRouter } from "next/navigation";
 
 type Props = { username: string; session: Session };
 
 function Following({ username, session }: Props) {
+  const router = useRouter();
   const getFollowingData = useCallback(async () => {
     try {
       const newFollowing = [];
@@ -79,7 +81,10 @@ function Following({ username, session }: Props) {
                 </Avatar>
               </div>
               <div style={{ marginLeft: "25px" }}>
-                <Button type="submit">
+                <Button
+                  type="submit"
+                  onClick={() => router.push(`/profile/${following.username}`)}
+                >
                   <i style={{ color: "hsl(var(--primary)" }} />
                   <span style={{ color: "hsl(var(--accent))" }}>
                     {following.username}
