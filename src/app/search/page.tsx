@@ -1,4 +1,3 @@
-//TODO: get backend working, display search results in pop up
 "use client";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,14 +14,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Search() {
-  const [searchQuery, setSearchQuery] = useState(""); // State to hold the search query
-  const [searchResults, setSearchResults] = useState<any[]>([]); // State to hold the search results
-  //   const [open, setOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   useEffect(() => {
     async function handleChange(username: string) {
       try {
-        console.log("searching for: ", username);
-
         const response = await fetch(
           `/api/search_users?username=${encodeURIComponent(username)}`,
           {
@@ -35,8 +31,8 @@ export default function Search() {
         if (!response.ok) {
           throw new Error("Failed to fetch search results");
         }
-        const searchData = await response.json(); // Parse response data as JSON
-        setSearchResults(searchData.data); // Assuming the response contains data field with search results
+        const searchData = await response.json();
+        setSearchResults(searchData.data);
       } catch (error) {
         console.error("Error fetching search results:", error);
       }
@@ -47,13 +43,9 @@ export default function Search() {
     } else {
       setSearchResults([]);
     }
-    console.log("searchQuery: ", searchQuery);
   }, [searchQuery]);
 
-  // Log searchResults whenever it changes
-  useEffect(() => {
-    console.log("searchResults: ", searchResults);
-  }, [searchResults]);
+  useEffect(() => {}, [searchResults]);
 
   return (
     <div className="flex flex-col gap-5">
