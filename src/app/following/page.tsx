@@ -1,19 +1,15 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import { SessionProvider } from "next-auth/react";
-import { NextResponse } from "next/server";
 
 export default function Following() {
   const { data: session } = useSession();
   const username = session?.user?.name;
 
-  const getfollowingData = useCallback(async () => {
+  const getFollowingData = useCallback(async () => {
     try {
       const newFollowing = [];
       const response = await fetch(
@@ -38,21 +34,20 @@ export default function Following() {
         }
       }
 
-      setfollowingData(newFollowing);
+      setFollowingData(newFollowing);
     } catch (error) {
-      console.error("Error fetching followering data:", error);
+      console.error("Error fetching following data:", error);
     }
   }, [username]);
 
-  const [followingData, setfollowingData] = useState<
-    { img: string; username: string }[]
-  >([]);
+  const [followingData, setFollowingData] = useState<any>([]);
 
   useEffect(() => {
     if (session) {
-      getfollowingData();
+      getFollowingData();
     }
-  }, [session, getfollowingData]);
+  }, [session, getFollowingData]);
+
   return (
     <div className="flex flex-col gap-5">
       <div

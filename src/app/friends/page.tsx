@@ -1,19 +1,16 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import { SessionProvider } from "next-auth/react";
-import { NextResponse } from "next/server";
+import { Session } from "next-auth";
+import Unauthorized from "@/components/unauthorized";
 
-function Following() {
-  const { data: session } = useSession();
-  const username = session?.user?.name;
+type Props = { username: string; session: Session };
 
-  const getfollowingData = useCallback(async () => {
+function Following({ username, session }: Props) {
+  const getFollowingData = useCallback(async () => {
     try {
       const newFollowing = [];
       const response = await fetch(
@@ -38,21 +35,21 @@ function Following() {
         }
       }
 
-      setfollowingData(newFollowing);
+      setFollowingData(newFollowing);
     } catch (error) {
       console.error("Error fetching followering data:", error);
     }
   }, [username]);
 
-  const [followingData, setfollowingData] = useState<
+  const [followingData, setFollowingData] = useState<
     { img: string; username: string }[]
   >([]);
 
   useEffect(() => {
     if (session) {
-      getfollowingData();
+      getFollowingData();
     }
-  }, [session, getfollowingData]);
+  }, [session, getFollowingData]);
   return (
     <div className="flex flex-col gap-5">
       <div
@@ -96,10 +93,7 @@ function Following() {
     </div>
   );
 }
-function Followers() {
-  const { data: session } = useSession();
-  const username = session?.user?.name;
-
+function Followers({ username, session }: Props) {
   const getFollowerData = useCallback(async () => {
     try {
       const newFollower = [];
@@ -184,14 +178,22 @@ function Followers() {
   );
 }
 export default function Friends() {
+  const { data: session } = useSession();
+  const username = session?.user?.name;
   return (
-    <div className="flex">
-      <div className="flex-1">
-        <Followers />
-      </div>
-      <div className="flex-1">
-        <Following />
-      </div>
+    <div>
+      {username ? (
+        <div className="flex">
+          <div className="flex-1">
+            <Followers username={username} session={session} />
+          </div>
+          <div className="flex-1">
+            <Following username={username} session={session} />
+          </div>
+        </div>
+      ) : (
+        <Unauthorized />
+      )}
     </div>
   );
 }
