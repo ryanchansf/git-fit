@@ -229,18 +229,14 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
                 <h1 className="font-bold text-4xl">{workoutsCount}</h1>
                 <p className="text-lg">Workouts</p>
               </div>
-              <Link href="/friends">
-                <div className="flex flex-col items-center">
-                  <h1 className="font-bold text-4xl">{followersCount}</h1>
-                  <p className="text-lg">Followers</p>
-                </div>
-              </Link>
-              <Link href="/friends">
-                <div className="flex flex-col items-center">
-                  <h1 className="font-bold text-4xl">{followingCount}</h1>
-                  <p className="text-lg">Following</p>
-                </div>
-              </Link>
+              <div className="flex flex-col items-center">
+                <h1 className="font-bold text-4xl">{followersCount}</h1>
+                <p className="text-lg">Followers</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <h1 className="font-bold text-4xl">{followingCount}</h1>
+                <p className="text-lg">Following</p>
+              </div>
             </div>
           </Card>
           <Card className="flex flex-col border-none items-center justify-center gap-3 py-5 px-10">
