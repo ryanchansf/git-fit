@@ -42,7 +42,44 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
   const [followersCount, setFollowersCount] = useState<number>(0);
   const [followingCount, setFollowingCount] = useState<number>(0);
   const { toast } = useToast();
+  // const username = session?.user?.name;
 
+  const handleAddFollower = async (following: any) => {
+    const message = {
+      following: following,
+    };
+    fetch(`/api/following?username=${username}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    })
+      .then((response) => response.json())
+      .then((message) => {
+        if (message.status === 500) {
+          toast({
+            title: "You already follow this user",
+            variant: "destructive",
+            duration: 3000,
+          });
+        } else {
+          toast({
+            title: "New following added!",
+            variant: "default",
+            duration: 3000,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error adding following:", error);
+        toast({
+          title: "Failed to add following",
+          variant: "destructive",
+          duration: 3000,
+        });
+      });
+  };
   const handleAddWorkout = async (workout: any) => {
     const message = {
       username: username,
@@ -153,6 +190,36 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
               </Avatar>
               <div className="flex flex-row items-center gap-2">
                 <h1 className="font-bold text-5xl">{params.slug}</h1>
+                <Dialog>
+                  <div style={{ marginLeft: "10px" }}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-accent" size="icon">
+                        <i
+                          className="fa-solid fa-plus"
+                          style={{ color: "hsl(var(--primary))" }}
+                        />
+                      </Button>
+                    </DialogTrigger>
+                  </div>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Follow Account</DialogTitle>
+                      <br />
+                      <div>
+                        Would you like to follow{" "}
+                        <span className="inline-block align-middle whitespace-nowrap max-w-[200px] overflow-auto text-red-500">
+                          {params.slug}
+                        </span>
+                        &apos;s page?
+                      </div>
+                      <DialogClose asChild>
+                        <Button onClick={() => handleAddFollower(params.slug)}>
+                          Follow
+                        </Button>
+                      </DialogClose>
+                    </DialogHeader>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
             <Separator className="my-4 sm:w-2/3" />
