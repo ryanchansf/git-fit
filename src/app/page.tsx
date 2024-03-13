@@ -59,8 +59,8 @@ import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 
 // TODO:
 //   - Link exercises to cards
-//   - Make edit button work
-//       - Import existing settings as default values
+//   - Edit button broken
+//   - Add exercise combobox broken
 
 const addWorkoutFormSchema = z.object({
   name: z
@@ -124,13 +124,6 @@ const addExerciseFormSchema = z.object({
 export default function Home() {
   const { data: session } = useSession();
   const username = session?.user?.name;
-
-  // function getExerciseFromId(data: any, exercises: any) {
-  //   // { name: "Lateral Raises", sets: XX, reps: XX },
-  //   for (const item of data) {
-
-  //   }
-  // }
 
   // Specifies default values that appear in the forms
   // Note: editWorkoutForm's default values are specified within the form
@@ -332,8 +325,32 @@ export default function Home() {
       setExercises(exercises);
     }
     getExercises();
+    const ex = getWorkoutExercises(4, getExercises);
+    console.log("eXES: ", ex);
     // This boolean stops an infinite refresh loop. I don't know why
   }, [false]);
+
+  async function getWorkoutExercises(w_id: any, ex_list: Object[]) {
+    const exercises: Object[] = [];
+    console.log("EXERCISES: ", ex_list);
+    await fetch(`api/workouts?w_id=${w_id}`)
+      .then((response) => response.json())
+      .then((message) => {
+        for (const obj of message.data) {
+          exercises.push({
+            name: ex_list.find((item: any) => item.value === "2").label,
+            //(item: any) => item.value === obj.exercise_id)?.label,
+            sets: obj.sets,
+            reps: obj.reps,
+          });
+        }
+      });
+    console.log("completed lsit: ", exercises);
+    return exercises;
+  }
+  if (exercises !== "undefined") {
+    getWorkoutExercises("4", exercises);
+  }
 
   return (
     <div className="flex flex-col gap-5">

@@ -178,7 +178,7 @@ export async function PUT(req: NextRequest) {
     const { error } = await db
       .from("workout_info")
       .update({ username, duration, difficulty, tags, w_name })
-      .match({ w_id });
+      .match({ w_id, username });
 
     if (error) {
       throw error;
