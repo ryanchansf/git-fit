@@ -59,8 +59,8 @@ import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 
 // TODO:
 //   - Link exercises to cards
-//   - Make edit button work
-//       - Import existing settings as default values
+//   - Edit button broken
+//   - Add exercise combobox broken
 
 const addWorkoutFormSchema = z.object({
   name: z
@@ -124,13 +124,6 @@ const addExerciseFormSchema = z.object({
 export default function Home() {
   const { data: session } = useSession();
   const username = session?.user?.name;
-
-  // function getExerciseFromId(data: any, exercises: any) {
-  //   // { name: "Lateral Raises", sets: XX, reps: XX },
-  //   for (const item of data) {
-
-  //   }
-  // }
 
   // Specifies default values that appear in the forms
   // Note: editWorkoutForm's default values are specified within the form
@@ -257,6 +250,7 @@ export default function Home() {
       },
       body: JSON.stringify(message),
     });
+    setExerciseAdd(exerciseAdd + 1);
     return promise;
   }
 
@@ -280,6 +274,7 @@ export default function Home() {
   // Control which parts of the page get reloaded, and when
   const [cardData, setCardData] = useState<any>([]);
   const [cardChange, setCardChange] = useState(0);
+  const [exerciseAdd, setExerciseAdd] = useState(0);
   const [exercises, setExercises] = useState<any>([]);
 
   // Reload cards if deletions, edits, additions are made
@@ -294,13 +289,15 @@ export default function Home() {
             for (const obj of message.data.sort(
               (a: any, b: any) => b.w_id - a.w_id,
             )) {
-              cardData.push({
-                title: `#${obj.w_id}: ${obj.w_name}`,
-                description: `Difficulty: ${obj.difficulty}`,
-                time: `Total time: ${obj.duration} min`,
-                exercises: [], // ${obj.exercise}
-                tags: obj.tags,
-              });
+              getWorkoutExercises(obj.w_id).then((data) =>
+                cardData.push({
+                  title: `#${obj.w_id}: ${obj.w_name}`,
+                  description: `Difficulty: ${obj.difficulty}`,
+                  time: `Total time: ${obj.duration} min`,
+                  exercises: data,
+                  tags: obj.tags,
+                }),
+              );
             }
           }
         });
@@ -309,31 +306,88 @@ export default function Home() {
     if (session?.user?.name) {
       getCardData();
     }
+
     // Clear form data
     addWorkoutForm.reset();
     editWorkoutForm.reset();
     addExerciseForm.reset();
-  }, [cardChange, session?.user?.name]);
+  }, [cardChange, exerciseAdd, session?.user?.name]);
 
+  // // Fetch exercises from backend
+  // useEffect(() => {
+  //   async function getExercises() {
+  //     const exercises: Object[] = [];
+  //     await fetch("api/exercises")
+  //       .then((response) => response.json())
+  //       .then((message) => {
+  //         for (const obj of message.data) {
+  //           exercises.push({
+  //             value: obj.ex_id,
+  //             label: obj.exercise_name,
+  //           });
+  //         }
+  //       });
+  //     setExercises(exercises);
+  //   }
+  //   getExercises();
+  //   console.log("Exercises", exercises);
+  //   // This boolean stops an infinite refresh loop. I don't know why
+  // }, [false]);
   // Fetch exercises from backend
   useEffect(() => {
     async function getExercises() {
-      const exercises: Object[] = [];
-      await fetch("api/exercises")
-        .then((response) => response.json())
-        .then((message) => {
-          for (const obj of message.data) {
-            exercises.push({
-              value: obj.ex_id,
-              label: obj.exercise_name,
-            });
-          }
-        });
-      setExercises(exercises);
+      try {
+        const response = await fetch("api/exercises");
+        if (!response.ok) {
+          throw new Error("Failed to fetch exercises");
+        }
+        const data = await response.json();
+        const fetchedExercises = data.data.map((obj: any) => ({
+          value: obj.ex_id,
+          label: obj.exercise_name,
+        }));
+        setExercises(fetchedExercises);
+        console.log("Exercises", fetchedExercises);
+      } catch (error) {
+        console.error("Error fetching exercises:", error);
+      }
     }
     getExercises();
-    // This boolean stops an infinite refresh loop. I don't know why
-  }, [false]);
+  }, []); // Empty dependency array to ensure the effect runs only once on component mount
+
+  // Return a list of exercise names, reps, and sets
+  async function getWorkoutExercises(w_id: any) {
+    const exercise_list: Object[] = [];
+
+    try {
+      const response = await fetch(`api/workouts?w_id=${w_id}`);
+      const message = await response.json();
+
+      if (message.data) {
+        for (const obj of message.data) {
+          if (obj.exercises && obj.exercises.exercise_name) {
+            exercise_list.push({
+              name: obj.exercises.exercise_name,
+              sets: obj.sets,
+              reps: obj.reps,
+            });
+          } else {
+            console.error("Exercise name is undefined or not present:", obj);
+            // Handle the case where obj.exercises is undefined or exercise_name is not present
+            // For example, you can skip adding this exercise to the list or handle it in another appropriate way
+          }
+        }
+      } else {
+        console.error("No data returned from the API:", message);
+        // Handle the case where no data is returned from the API
+      }
+    } catch (error) {
+      console.error("Error fetching data from the API:", error);
+      // Handle any errors that occur during the fetch or JSON parsing
+    }
+
+    return exercise_list;
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -660,8 +714,8 @@ export default function Home() {
                       <p>
                         {exerciseIndex + 1}. {exercise.name}
                       </p>
-                      <p>{exercise.sets}</p>
-                      <p>{exercise.rest} rest</p>
+                      <p>{exercise.reps} reps</p>
+                      <p>{exercise.sets} sets</p>
                     </div>
                   ))}
                   {/* Add exercise dialogue */}
