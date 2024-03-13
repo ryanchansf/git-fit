@@ -4,14 +4,12 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 
 export default function Following() {
   const { data: session } = useSession();
   const username = session?.user?.name;
-  const router = useRouter();
 
-  const getfollowingData = useCallback(async () => {
+  const getFollowingData = useCallback(async () => {
     try {
       const newFollowing = [];
       const response = await fetch(
@@ -24,9 +22,11 @@ export default function Following() {
         throw new Error("Failed to fetch following data");
       }
       const responseData = await response.json();
+      console.log("Response Data:", responseData);
 
       if (responseData.data && Array.isArray(responseData.data)) {
         for (const obj of responseData.data) {
+          console.log("obj: ", obj);
           newFollowing.push({
             img: "hgsdfaj",
             username: obj.following,
@@ -34,41 +34,19 @@ export default function Following() {
         }
       }
 
-      setfollowingData(newFollowing);
+      setFollowingData(newFollowing);
     } catch (error) {
-      console.error("Error fetching followering data:", error);
+      console.error("Error fetching following data:", error);
     }
   }, [username]);
 
-  const [followingData, setfollowingData] = useState<
-    { img: string; username: string }[]
-  >([]);
-  const [followingChange, setfollowingChange] = useState(0);
+  const [followingData, setFollowingData] = useState<any>([]);
 
   useEffect(() => {
     if (session) {
-      getfollowingData();
+      getFollowingData();
     }
-  }, [session, getfollowingData, followingChange]);
-
-  async function handleDeleteClick(remove_user: any) {
-    const message = {
-      following: remove_user,
-    };
-    const promise = await fetch(
-      `/api/following?username=${encodeURIComponent(username || "")}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(message),
-      },
-    );
-    //  console.log("made it back from api call");
-    setfollowingChange(followingChange + 1);
-    return promise;
-  }
+  }, [session, getFollowingData]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -99,23 +77,11 @@ export default function Following() {
                 </Avatar>
               </div>
               <div style={{ marginLeft: "25px" }}>
-                <Button
-                  type="submit"
-                  onClick={() => router.push(`/profile/${following.username}`)}
-                >
+                <Button type="submit">
                   <i style={{ color: "hsl(var(--primary)" }} />
                   <span style={{ color: "hsl(var(--accent))" }}>
                     {following.username}
                   </span>
-                </Button>
-              </div>
-              <div style={{ marginLeft: "25px" }}>
-                <Button className="bg-accent" size="icon">
-                  <i
-                    className="fa-solid fa-trash"
-                    style={{ color: "hsl(var(--primary))" }}
-                    onClick={() => handleDeleteClick(following.username)}
-                  />
                 </Button>
               </div>
             </div>

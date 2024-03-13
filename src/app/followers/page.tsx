@@ -4,12 +4,10 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 
 export default function Followers() {
   const { data: session } = useSession();
   const username = session?.user?.name;
-  const router = useRouter();
 
   const getFollowerData = useCallback(async () => {
     try {
@@ -24,9 +22,11 @@ export default function Followers() {
         throw new Error("Failed to fetch follower data");
       }
       const responseData = await response.json();
+      console.log("Response Data:", responseData);
 
       if (responseData.data && Array.isArray(responseData.data)) {
         for (const obj of responseData.data) {
+          console.log("obj: ", obj);
           newFollower.push({
             img: "hgsdfaj",
             username: obj.follower,
@@ -78,10 +78,7 @@ export default function Followers() {
                 </Avatar>
               </div>
               <div style={{ marginLeft: "25px" }}>
-                <Button
-                  type="submit"
-                  onClick={() => router.push(`/profile/${follower.username}`)}
-                >
+                <Button type="submit">
                   <i style={{ color: "hsl(var(--primary)" }} />
                   <span style={{ color: "hsl(var(--accent))" }}>
                     {follower.username}

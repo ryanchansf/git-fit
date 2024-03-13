@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 export default function WelcomeHeader() {
   const { data: session } = useSession();
+  console.log("Session from header: ", session);
   const username = session?.user?.name;
 
   if (!username) {

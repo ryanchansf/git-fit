@@ -1,7 +1,5 @@
 # API Specification
 
-Last Updated February 10, 2024
-
 ## X. Endpoint Name
 
 ### X.X. Function Name - `URL` (TYPE)
@@ -24,11 +22,12 @@ Description of function.
 }
 ```
 
+
 ## 1. Users
 
 ### 1.1. New User - `/users/` (POST)
 
-Creates a new user. User inputs their desired username and their email, and receives their User ID in return. We should probably include passwords for verifcation purposes, but then we have to hash and secure it somehow. Can add later down the line if necessary.
+Creates a new user. User inputs their desired username and their email, and receives their User ID in return. We should probably include passwords for verifcation purposes, but then we have to hash and secure it somehow. Can add later down the line if necessary. 
 
 **Request:**
 
@@ -75,7 +74,9 @@ Deletes a user and their account based on their ID. Should have to authenticate 
 **Request:**
 
 ```json
-{}
+{
+  
+}
 ```
 
 **Returns:**
@@ -258,7 +259,9 @@ Deletes the desired workout. Should have to authenticate with password, if we en
 **Request:**
 
 ```json
-{}
+{
+
+}
 ```
 
 **Returns:**
@@ -271,4 +274,4 @@ Deletes the desired workout. Should have to authenticate with password, if we en
 
 ### Workouts Example Flow
 
-Caroline wants to build her small calves so she calls create workout and passes in "Kalf Killer" and gets back a workout id of 1. She is overwhelmed by the thought of customizing her own workout but luckily she has Git Fit which makes it easy to start her calf building journey. She starts by calling the search exercises endpoint and searches by the calf muscle group and looks at the exercise list available. She finds an exercise she likes that has an exercise id of 2 and proceeds to add the exercise by calling the add exercise endpoint and inputting the exercise id. Feeling inspired, she decides she wants to create an exercise of her own so she calls the create exercise endpoint inputting the name of the exercise, the muscle group, and equipment needed. She gets back an exercise id and then adds this exercise to her workout. She continues these steps and adds over 10 new calf exercises to her workout. Then, she decides that she actually really enjoys her small calves and deletes her workout by calling the delete workout endpoint.
+Caroline wants to build her small calves so she calls create workout and passes in "Kalf Killer" and gets back a workout id of 1. She is overwhelmed by the thought of customizing her own workout but luckily she has Git Fit which makes it easy to start her calf building journey. She starts by calling the search exercises endpoint and searches by the calf muscle group and looks at the exercise list available. She finds an exercise she likes that has an exercise id of 2 and proceeds to add the exercise by calling the add exercise endpoint and inputting the exercise id. Feeling inspired, she decides she wants to create an exercise of her own so she calls the create exercise endpoint inputting the name of the exercise, the muscle group, and equipment needed. She gets back an exercise id and then adds this exercise to her workout. She continues these steps and adds over 10 new calf exercises to her workout. Then, she decides that she actually really enjoys her small calves and deletes her workout by calling the delete workout endpoint. 
