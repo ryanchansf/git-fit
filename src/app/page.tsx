@@ -250,6 +250,7 @@ export default function Home() {
       },
       body: JSON.stringify(message),
     });
+    setExerciseAdd(exerciseAdd + 1);
     return promise;
   }
 
@@ -273,6 +274,7 @@ export default function Home() {
   // Control which parts of the page get reloaded, and when
   const [cardData, setCardData] = useState<any>([]);
   const [cardChange, setCardChange] = useState(0);
+  const [exerciseAdd, setExerciseAdd] = useState(0);
   const [exercises, setExercises] = useState<any>([]);
 
   // Reload cards if deletions, edits, additions are made
@@ -287,13 +289,15 @@ export default function Home() {
             for (const obj of message.data.sort(
               (a: any, b: any) => b.w_id - a.w_id,
             )) {
-              cardData.push({
-                title: `#${obj.w_id}: ${obj.w_name}`,
-                description: `Difficulty: ${obj.difficulty}`,
-                time: `Total time: ${obj.duration} min`,
-                exercises: [], // ${obj.exercise}
-                tags: obj.tags,
-              });
+              getWorkoutExercises(obj.w_id).then((data) =>
+                cardData.push({
+                  title: `#${obj.w_id}: ${obj.w_name}`,
+                  description: `Difficulty: ${obj.difficulty}`,
+                  time: `Total time: ${obj.duration} min`,
+                  exercises: data,
+                  tags: obj.tags,
+                }),
+              );
             }
           }
         });
@@ -302,11 +306,12 @@ export default function Home() {
     if (session?.user?.name) {
       getCardData();
     }
+
     // Clear form data
     addWorkoutForm.reset();
     editWorkoutForm.reset();
     addExerciseForm.reset();
-  }, [cardChange, session?.user?.name]);
+  }, [cardChange, exerciseAdd, session?.user?.name]);
 
   // Fetch exercises from backend
   useEffect(() => {
@@ -325,31 +330,26 @@ export default function Home() {
       setExercises(exercises);
     }
     getExercises();
-    const ex = getWorkoutExercises(4, getExercises);
-    console.log("eXES: ", ex);
     // This boolean stops an infinite refresh loop. I don't know why
   }, [false]);
 
-  async function getWorkoutExercises(w_id: any, ex_list: Object[]) {
-    const exercises: Object[] = [];
-    console.log("EXERCISES: ", ex_list);
+  // Return a list of exercise names, reps, and sets
+  async function getWorkoutExercises(w_id: any) {
+    const exercise_list: Object[] = [];
     await fetch(`api/workouts?w_id=${w_id}`)
       .then((response) => response.json())
       .then((message) => {
-        for (const obj of message.data) {
-          exercises.push({
-            name: ex_list.find((item: any) => item.value === "2").label,
-            //(item: any) => item.value === obj.exercise_id)?.label,
-            sets: obj.sets,
-            reps: obj.reps,
-          });
+        if (message.data) {
+          for (const obj of message.data) {
+            exercise_list.push({
+              name: obj.exercises.exercise_name,
+              sets: obj.sets,
+              reps: obj.reps,
+            });
+          }
         }
       });
-    console.log("completed lsit: ", exercises);
-    return exercises;
-  }
-  if (exercises !== "undefined") {
-    getWorkoutExercises("4", exercises);
+    return exercise_list;
   }
 
   return (
@@ -677,8 +677,8 @@ export default function Home() {
                       <p>
                         {exerciseIndex + 1}. {exercise.name}
                       </p>
-                      <p>{exercise.sets}</p>
-                      <p>{exercise.rest} rest</p>
+                      <p>{exercise.reps} reps</p>
+                      <p>{exercise.sets} sets</p>
                     </div>
                   ))}
                   {/* Add exercise dialogue */}

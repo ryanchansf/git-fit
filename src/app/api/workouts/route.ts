@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     if (w_id) {
       query = db
         .from("workouts")
-        .select("exercise_id, sets, reps")
+        .select(`exercises ( exercise_name ), sets, reps`)
         .eq("w_id", w_id);
     }
     if (username) {
