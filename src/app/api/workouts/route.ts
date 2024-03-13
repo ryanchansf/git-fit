@@ -11,11 +11,17 @@ export async function GET(req: NextRequest) {
     const difficulty = url.searchParams.get("difficulty");
     const tags = url.searchParams.get("tags");
     const w_name = url.searchParams.get("w_name");
+    const w_id = url.searchParams.get("w_id");
 
     let data, error;
-
     let query = db.from("workout_info").select("*");
 
+    if (w_id) {
+      query = db
+        .from("workouts")
+        .select("exercise_id, sets, reps")
+        .eq("w_id", w_id);
+    }
     if (username) {
       query = query.ilike("username", username);
     }
