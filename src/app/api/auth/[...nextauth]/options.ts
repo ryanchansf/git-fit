@@ -2,6 +2,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import getBaseUrl from "@/database/path";
+import bcrypt from "bcrypt";
 
 const options: AuthOptions = {
   providers: [
@@ -46,9 +47,18 @@ const options: AuthOptions = {
             const data = await response.json();
 
             // check if password matches
-            const password = data.data[0].password;
-            if (password != credentials?.password) {
-              console.log("Password does not match");
+            const hashed_password = data.data[0].password;
+            const password: any = credentials?.password;
+            const match = await bcrypt
+              .compare(password, hashed_password)
+              .then((matched) => {
+                if (!matched) {
+                  console.log("Password does not match");
+                  return null;
+                }
+                return true;
+              });
+            if (!match) {
               return null;
             }
 

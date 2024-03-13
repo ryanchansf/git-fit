@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/database/db";
+import bcrypt from "bcrypt";
 
 export async function POST(req: Request) {
   try {
@@ -8,10 +9,20 @@ export async function POST(req: Request) {
     const { username, email, password } = await req.json();
     console.log(username, email, password);
 
+    const hashedPassword = await bcrypt
+      .genSalt(10)
+      .then((salt) => {
+        return bcrypt.hash(password, salt);
+      })
+      .catch((error) => {
+        console.error("Error hashing password", error);
+      });
+    console.log("Hashed password", hashedPassword);
+
     // Insert the new user into the Supabase database
     const { error } = await supabase
       .from("users")
-      .insert([{ username, email, password }] as any);
+      .insert([{ username, email, password: hashedPassword }] as any);
 
     if (error) {
       throw error;
