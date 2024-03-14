@@ -51,24 +51,31 @@ export default function Following() {
     }
   }, [session, getfollowingData, followingChange]);
 
-  async function handleDeleteClick(remove_user: any) {
-    const message = {
-      following: remove_user,
-    };
-    const promise = await fetch(
-      `/api/following?username=${encodeURIComponent(username || "")}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
+  const handleDeleteClick = async (remove_user: any) => {
+    try {
+      const message = {
+        following: remove_user,
+      };
+      const response = await fetch(
+        `/api/following?username=${encodeURIComponent(username || "")}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(message),
         },
-        body: JSON.stringify(message),
-      },
-    );
-    //  console.log("made it back from api call");
-    setfollowingChange(followingChange + 1);
-    return promise;
-  }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete following");
+      }
+
+      setfollowingChange(followingChange + 1);
+    } catch (error) {
+      console.error("Error deleting following:", error);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-5">
@@ -98,10 +105,13 @@ export default function Following() {
                   </AvatarFallback>
                 </Avatar>
               </div>
+
               <div style={{ marginLeft: "25px" }}>
                 <Button
-                  type="submit"
-                  onClick={() => router.push(`/profile/${following.username}`)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    router.push(`/profile/${following.username}`);
+                  }}
                 >
                   <i style={{ color: "hsl(var(--primary)" }} />
                   <span style={{ color: "hsl(var(--accent))" }}>
@@ -110,11 +120,15 @@ export default function Following() {
                 </Button>
               </div>
               <div style={{ marginLeft: "25px" }}>
-                <Button className="bg-accent" size="icon">
+                <Button
+                  type="button" // Change type to "button"
+                  className="bg-accent"
+                  size="icon"
+                  onClick={() => handleDeleteClick(following.username)}
+                >
                   <i
                     className="fa-solid fa-trash"
                     style={{ color: "hsl(var(--primary))" }}
-                    onClick={() => handleDeleteClick(following.username)}
                   />
                 </Button>
               </div>

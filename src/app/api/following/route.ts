@@ -7,24 +7,16 @@ export async function GET(req: NextRequest) {
   const username = url.searchParams.get("username");
   try {
     const db = connectDB();
-    // const url = new URL(req.url ? req.url : "invalid");
-    // const username = url.searchParams.get("username");
 
     let data, error;
     if (!db) {
       throw new Error("Failed to connect to the database");
     }
-    // If a username is provided, get that specific user
     if (username) {
       ({ data, error } = await db
         .from("following")
         .select("following")
         .eq("follower", username));
-      //pretty sure I don't need this..
-      //   // If no user was found, throw an error
-      //   if (data && data.length === 0) {
-      //     throw new Error(`User with username ${username} not found`);
-      //   }
     } else {
       // If no username is provided, get all users
       ({ data, error } = await db.from("following").select("*"));
@@ -50,6 +42,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const url = new URL(req.url ? req.url : "invalid");
   const follower = url.searchParams.get("username");
+  console.log("In backend: follower: ", follower);
   try {
     const db = connectDB();
 
@@ -58,7 +51,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { following } = await req.json();
-
+    console.log("following: ", following);
     const { data: check_follower, error: follower_exists_error } = await db
       .from("users")
       .select("*")
