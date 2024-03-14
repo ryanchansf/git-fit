@@ -83,11 +83,11 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
   const handleAddWorkout = async (workout: any) => {
     const message = {
       username: username,
-      duration: workout.duration,
-      difficulty: workout.difficulty,
+      duration: workout.time.split(" ")[2],
+      difficulty: workout.description.split(" ")[1],
       tags: workout.tags,
-      w_name: workout.w_name,
-      w_id: workout.w_id,
+      w_name: workout.title.split(": ")[1],
+      w_id: workout.title.slice(1).split(": ")[0],
     };
     fetch("/api/workouts", {
       method: "POST",
@@ -122,38 +122,52 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
       });
   };
 
+  // Return a list of exercise names, reps, and sets
+  async function getWorkoutExercises(w_id: any) {
+    const exercise_list: Object[] = [];
+    await fetch(getApiUrl(`/api/workouts?w_id=${w_id}`))
+      .then((response) => response.json())
+      .then((message) => {
+        if (message.data) {
+          for (const obj of message.data) {
+            exercise_list.push({
+              name: obj.exercises.exercise_name,
+              sets: obj.sets,
+              reps: obj.reps,
+            });
+          }
+        }
+      });
+    return exercise_list;
+  }
+
   useEffect(() => {
-    const fetchWorkouts = async () => {
+    async function fetchWorkouts() {
       const cardData: Object[] = [];
       try {
-        const response = await fetch(
-          getApiUrl(`/api/workouts?username=${params.slug}`),
-        )
+        await fetch(getApiUrl(`/api/workouts?username=${params.slug}`))
           .then((response) => response.json())
-          .then((message) => {
-            // Order by workout ID, newest first
+          .then(async (message) => {
             if (message.data) {
               for (const obj of message.data.sort(
                 (a: any, b: any) => b.w_id - a.w_id,
               )) {
-                const card = { ...obj };
-                // TODO: replace with obj.exercises
-                (card["exercises"] = [
-                  { name: "Bench Press", sets: "4x8", rest: "2 min" },
-                  { name: "Overhead Press", sets: "4x8", rest: "2 min" },
-                  { name: "Tricep Extension", sets: "4x8", rest: "2 min" },
-                  { name: "Tricep Dips", sets: "4x8", rest: "2 min" },
-                  { name: "Lateral Raises", sets: "4x8", rest: "2 min" },
-                ]),
-                  cardData.push(card);
+                const data = await getWorkoutExercises(obj.w_id);
+                cardData.push({
+                  title: `#${obj.w_id}: ${obj.w_name}`,
+                  description: `Difficulty: ${obj.difficulty}`,
+                  time: `Total time: ${obj.duration} min`,
+                  exercises: data,
+                  tags: obj.tags,
+                });
               }
+              setWorkouts(cardData);
             }
           });
-        setWorkouts(cardData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-    };
+    }
     async function fetchProfileData() {
       try {
         const response = await fetch(
@@ -171,6 +185,7 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
     }
     fetchProfileData();
     fetchWorkouts();
+    console.log(fetchWorkouts());
   }, [params.slug]);
 
   const username = session?.user?.name;
@@ -229,14 +244,18 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
                 <h1 className="font-bold text-4xl">{workoutsCount}</h1>
                 <p className="text-lg">Workouts</p>
               </div>
-              <div className="flex flex-col items-center">
-                <h1 className="font-bold text-4xl">{followersCount}</h1>
-                <p className="text-lg">Followers</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <h1 className="font-bold text-4xl">{followingCount}</h1>
-                <p className="text-lg">Following</p>
-              </div>
+              <Link href="/friends">
+                <div className="flex flex-col items-center">
+                  <h1 className="font-bold text-4xl">{followersCount}</h1>
+                  <p className="text-lg">Followers</p>
+                </div>
+              </Link>
+              <Link href="/friends">
+                <div className="flex flex-col items-center">
+                  <h1 className="font-bold text-4xl">{followingCount}</h1>
+                  <p className="text-lg">Following</p>
+                </div>
+              </Link>
             </div>
           </Card>
           <Card className="flex flex-col border-none items-center justify-center gap-3 py-5 px-10">
@@ -254,9 +273,7 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
                   <Card key={index}>
                     <CardHeader>
                       <div className="flex justify-between items-center">
-                        <CardTitle>
-                          #{w.w_id}: {w.w_name}
-                        </CardTitle>
+                        <CardTitle>{w.title}</CardTitle>
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button className="bg-accent" size="icon">
@@ -268,9 +285,7 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
-                              <DialogTitle>
-                                #{w.w_id}: {w.w_name}
-                              </DialogTitle>
+                              <DialogTitle>{w.title}</DialogTitle>
                               <br />
                               <div>
                                 Would you like to add{" "}
@@ -288,9 +303,7 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
                           </DialogContent>
                         </Dialog>
                       </div>
-                      <CardDescription>
-                        Difficulty: {w.difficulty}
-                      </CardDescription>
+                      <CardDescription>{w.description}</CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4">
                       <div className="flex items-center space-x-4 rounded-md border p-4">

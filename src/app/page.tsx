@@ -284,25 +284,25 @@ export default function Home() {
       const cardData: Object[] = [];
       await fetch(`/api/workouts?username=${session?.user?.name}`)
         .then((response) => response.json())
-        .then((message) => {
+        .then(async (message) => {
           if (message.data) {
             for (const obj of message.data.sort(
               (a: any, b: any) => b.w_id - a.w_id,
             )) {
-              getWorkoutExercises(obj.w_id).then((data) =>
-                cardData.push({
-                  title: `#${obj.w_id}: ${obj.w_name}`,
-                  description: `Difficulty: ${obj.difficulty}`,
-                  time: `Total time: ${obj.duration} min`,
-                  exercises: data,
-                  tags: obj.tags,
-                }),
-              );
+              const data = await getWorkoutExercises(obj.w_id);
+              cardData.push({
+                title: `#${obj.w_id}: ${obj.w_name}`,
+                description: `Difficulty: ${obj.difficulty}`,
+                time: `Total time: ${obj.duration} min`,
+                exercises: data,
+                tags: obj.tags,
+              });
             }
+            setCardData(cardData);
           }
         });
-      setCardData(cardData);
     }
+
     if (session?.user?.name) {
       getCardData();
     }
