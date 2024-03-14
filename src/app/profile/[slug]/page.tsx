@@ -317,8 +317,8 @@ export default function FriendPage({ params }: { params: { slug: string } }) {
                                 <p>
                                   {exerciseIndex + 1}. {exercise.name}
                                 </p>
-                                <p>{exercise.sets}</p>
-                                <p>{exercise.rest} rest</p>
+                                <p>{exercise.reps} reps</p>
+                                <p>{exercise.sets} sets</p>
                               </div>
                             ),
                           )}
