@@ -82,7 +82,11 @@ export default function ProfilePage() {
             </Link>
           </div>
           <div className="flex flex-col items-center hover:-translate-y-[2px]">
-            <Button variant="link" onClick={() => handleLogout()}>
+            <Button
+              variant="link"
+              onClick={() => handleLogout()}
+              data-testid="logout-button"
+            >
               <i
                 className="fa-solid fa-arrow-right-from-bracket fa-2x"
                 style={{ color: "hsl(var(--accent))" }}
