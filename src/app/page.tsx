@@ -672,6 +672,7 @@ export default function Home() {
               <div className="flex items-center space-x-4 rounded-md border p-4">
                 <div className="flex-1 space-y-1">
                   <p className="text-lg font-medium leading-none">Exercises</p>
+                  {/* Extract each individual exercise and its values and index in the list */}
                   {card.exercises.map((exercise: any, exerciseIndex: any) => (
                     <div key={exerciseIndex} className="flex gap-3">
                       <p>
