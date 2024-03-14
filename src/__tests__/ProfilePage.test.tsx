@@ -85,7 +85,7 @@ test("clicking followers navigates to /friends when the link is clicked", async 
   expect(linkElement!.getAttribute("href")).toBe("/friends");
 });
 
-test("clicking followers navigates to /friends when the link is clicked", async () => {
+test("logout button signs user out", async () => {
   (useSession as jest.Mock).mockReturnValue({
     data: {
       user: {
