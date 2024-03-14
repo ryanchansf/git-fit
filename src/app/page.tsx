@@ -59,8 +59,8 @@ import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 
 // TODO:
 //   - Link exercises to cards
-//   - Make edit button work
-//       - Import existing settings as default values
+//   - Edit button broken
+//   - Add exercise combobox broken
 
 const addWorkoutFormSchema = z.object({
   name: z
@@ -124,13 +124,6 @@ const addExerciseFormSchema = z.object({
 export default function Home() {
   const { data: session } = useSession();
   const username = session?.user?.name;
-
-  // function getExerciseFromId(data: any, exercises: any) {
-  //   // { name: "Lateral Raises", sets: XX, reps: XX },
-  //   for (const item of data) {
-
-  //   }
-  // }
 
   // Specifies default values that appear in the forms
   // Note: editWorkoutForm's default values are specified within the form
@@ -257,6 +250,7 @@ export default function Home() {
       },
       body: JSON.stringify(message),
     });
+    setExerciseAdd(exerciseAdd + 1);
     return promise;
   }
 
@@ -280,6 +274,7 @@ export default function Home() {
   // Control which parts of the page get reloaded, and when
   const [cardData, setCardData] = useState<any>([]);
   const [cardChange, setCardChange] = useState(0);
+  const [exerciseAdd, setExerciseAdd] = useState(0);
   const [exercises, setExercises] = useState<any>([]);
 
   // Reload cards if deletions, edits, additions are made
@@ -294,13 +289,15 @@ export default function Home() {
             for (const obj of message.data.sort(
               (a: any, b: any) => b.w_id - a.w_id,
             )) {
-              cardData.push({
-                title: `#${obj.w_id}: ${obj.w_name}`,
-                description: `Difficulty: ${obj.difficulty}`,
-                time: `Total time: ${obj.duration} min`,
-                exercises: [], // ${obj.exercise}
-                tags: obj.tags,
-              });
+              getWorkoutExercises(obj.w_id).then((data) =>
+                cardData.push({
+                  title: `#${obj.w_id}: ${obj.w_name}`,
+                  description: `Difficulty: ${obj.difficulty}`,
+                  time: `Total time: ${obj.duration} min`,
+                  exercises: data,
+                  tags: obj.tags,
+                }),
+              );
             }
           }
         });
@@ -309,11 +306,12 @@ export default function Home() {
     if (session?.user?.name) {
       getCardData();
     }
+
     // Clear form data
     addWorkoutForm.reset();
     editWorkoutForm.reset();
     addExerciseForm.reset();
-  }, [cardChange, session?.user?.name]);
+  }, [cardChange, exerciseAdd, session?.user?.name]);
 
   // Fetch exercises from backend
   useEffect(() => {
@@ -334,6 +332,25 @@ export default function Home() {
     getExercises();
     // This boolean stops an infinite refresh loop. I don't know why
   }, [false]);
+
+  // Return a list of exercise names, reps, and sets
+  async function getWorkoutExercises(w_id: any) {
+    const exercise_list: Object[] = [];
+    await fetch(`api/workouts?w_id=${w_id}`)
+      .then((response) => response.json())
+      .then((message) => {
+        if (message.data) {
+          for (const obj of message.data) {
+            exercise_list.push({
+              name: obj.exercises.exercise_name,
+              sets: obj.sets,
+              reps: obj.reps,
+            });
+          }
+        }
+      });
+    return exercise_list;
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -655,13 +672,14 @@ export default function Home() {
               <div className="flex items-center space-x-4 rounded-md border p-4">
                 <div className="flex-1 space-y-1">
                   <p className="text-lg font-medium leading-none">Exercises</p>
+                  {/* Extract each individual exercise and its values and index in the list */}
                   {card.exercises.map((exercise: any, exerciseIndex: any) => (
                     <div key={exerciseIndex} className="flex gap-3">
                       <p>
                         {exerciseIndex + 1}. {exercise.name}
                       </p>
-                      <p>{exercise.sets}</p>
-                      <p>{exercise.rest} rest</p>
+                      <p>{exercise.reps} reps</p>
+                      <p>{exercise.sets} sets</p>
                     </div>
                   ))}
                   {/* Add exercise dialogue */}

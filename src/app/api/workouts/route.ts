@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     if (w_id) {
       query = db
         .from("workouts")
-        .select("exercise_id, sets, reps")
+        .select(`exercises ( exercise_name ), sets, reps`)
         .eq("w_id", w_id);
     }
     if (username) {
@@ -178,7 +178,7 @@ export async function PUT(req: NextRequest) {
     const { error } = await db
       .from("workout_info")
       .update({ username, duration, difficulty, tags, w_name })
-      .match({ w_id });
+      .match({ w_id, username });
 
     if (error) {
       throw error;
